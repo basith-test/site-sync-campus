@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Eye, Save, Settings, Palette, Type, Layout } from "lucide-react";
@@ -6,6 +5,14 @@ import { useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import EditableSection from "@/components/EditableSection";
 import EditorSidebar from "@/components/EditorSidebar";
+
+interface NavigationItem {
+  id: string;
+  label: string;
+  href: string;
+  type: 'internal' | 'external' | 'dropdown';
+  children?: NavigationItem[];
+}
 
 const WebsiteEditor = () => {
   const navigate = useNavigate();
@@ -20,6 +27,13 @@ const WebsiteEditor = () => {
     aboutContent: "Established in 1985, Springfield University has been at the forefront of educational excellence, fostering innovation, research, and character development for over three decades.",
     primaryColor: "#2563eb",
     secondaryColor: "#10b981",
+    navigationItems: [
+      { id: 'home', label: 'Home', href: '#', type: 'internal' as const },
+      { id: 'departments', label: 'Departments', href: '#', type: 'dropdown' as const },
+      { id: 'admissions', label: 'Admissions', href: '#', type: 'internal' as const },
+      { id: 'about', label: 'About', href: '#', type: 'internal' as const },
+      { id: 'contact', label: 'Contact', href: '#', type: 'internal' as const },
+    ] as NavigationItem[],
   });
 
   const tabs = [
@@ -34,7 +48,7 @@ const WebsiteEditor = () => {
     // Here would be the save logic
   };
 
-  const updateWebsiteData = (field: string, value: string) => {
+  const updateWebsiteData = (field: string, value: string | NavigationItem[]) => {
     setWebsiteData(prev => ({ ...prev, [field]: value }));
   };
 

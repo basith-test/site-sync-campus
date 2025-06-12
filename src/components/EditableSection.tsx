@@ -1,7 +1,14 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Edit, Phone, Mail, MapPin, Calendar, Users, Award, ExternalLink } from "lucide-react";
+
+interface NavigationItem {
+  id: string;
+  label: string;
+  href: string;
+  type: 'internal' | 'external' | 'dropdown';
+  children?: NavigationItem[];
+}
 
 interface EditableSectionProps {
   data: {
@@ -13,8 +20,9 @@ interface EditableSectionProps {
     aboutContent: string;
     primaryColor: string;
     secondaryColor: string;
+    navigationItems?: NavigationItem[];
   };
-  onUpdate: (field: string, value: string) => void;
+  onUpdate: (field: string, value: string | NavigationItem[]) => void;
   onEditSection: (sectionId: string) => void;
   editingSection: string | null;
 }
@@ -78,6 +86,16 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
     </div>
   );
 
+  const defaultNavigationItems: NavigationItem[] = [
+    { id: 'home', label: 'Home', href: '#', type: 'internal' },
+    { id: 'departments', label: 'Departments', href: '#', type: 'dropdown' },
+    { id: 'admissions', label: 'Admissions', href: '#', type: 'internal' },
+    { id: 'about', label: 'About', href: '#', type: 'internal' },
+    { id: 'contact', label: 'Contact', href: '#', type: 'internal' },
+  ];
+
+  const navigationItems = data.navigationItems || defaultNavigationItems;
+
   return (
     <div className="bg-white">
       {/* Header */}
@@ -101,11 +119,17 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
               </div>
             </div>
             <nav className="hidden md:flex space-x-8">
-              <a href="#" className="text-slate-700 hover:text-blue-600 font-medium">Home</a>
-              <a href="#" className="text-slate-700 hover:text-blue-600 font-medium">Departments</a>
-              <a href="#" className="text-slate-700 hover:text-blue-600 font-medium">Admissions</a>
-              <a href="#" className="text-slate-700 hover:text-blue-600 font-medium">About</a>
-              <a href="#" className="text-slate-700 hover:text-blue-600 font-medium">Contact</a>
+              {navigationItems.map((item) => (
+                <a 
+                  key={item.id}
+                  href={item.href} 
+                  className="text-slate-700 hover:text-blue-600 font-medium"
+                  target={item.type === 'external' ? '_blank' : undefined}
+                  rel={item.type === 'external' ? 'noopener noreferrer' : undefined}
+                >
+                  {item.label}
+                </a>
+              ))}
             </nav>
           </div>
         </div>

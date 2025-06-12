@@ -1,9 +1,17 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import ColorPicker from "./ColorPicker";
+import NavigationEditor from "./NavigationEditor";
+
+interface NavigationItem {
+  id: string;
+  label: string;
+  href: string;
+  type: 'internal' | 'external' | 'dropdown';
+  children?: NavigationItem[];
+}
 
 interface EditorSidebarProps {
   editingSection: string | null;
@@ -16,11 +24,20 @@ interface EditorSidebarProps {
     aboutContent: string;
     primaryColor: string;
     secondaryColor: string;
+    navigationItems?: NavigationItem[];
   };
-  updateWebsiteData: (field: string, value: string) => void;
+  updateWebsiteData: (field: string, value: string | NavigationItem[]) => void;
 }
 
 const EditorSidebar = ({ editingSection, websiteData, updateWebsiteData }: EditorSidebarProps) => {
+  const defaultNavigationItems: NavigationItem[] = [
+    { id: 'home', label: 'Home', href: '#', type: 'internal' },
+    { id: 'departments', label: 'Departments', href: '#', type: 'dropdown' },
+    { id: 'admissions', label: 'Admissions', href: '#', type: 'internal' },
+    { id: 'about', label: 'About', href: '#', type: 'internal' },
+    { id: 'contact', label: 'Contact', href: '#', type: 'internal' },
+  ];
+
   if (!editingSection) {
     return (
       <div className="flex items-center justify-center h-full text-slate-500">
@@ -59,6 +76,19 @@ const EditorSidebar = ({ editingSection, websiteData, updateWebsiteData }: Edito
                     onChange={(e) => updateWebsiteData("tagline", e.target.value)}
                   />
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Navigation Menu</CardTitle>
+                <CardDescription>Manage your website navigation</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <NavigationEditor
+                  items={websiteData.navigationItems || defaultNavigationItems}
+                  onUpdate={(items) => updateWebsiteData("navigationItems", items)}
+                />
               </CardContent>
             </Card>
           </div>
