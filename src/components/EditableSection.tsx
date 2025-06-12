@@ -15,9 +15,11 @@ interface EditableSectionProps {
     secondaryColor: string;
   };
   onUpdate: (field: string, value: string) => void;
+  onEditSection: (sectionId: string) => void;
+  editingSection: string | null;
 }
 
-const EditableSection = ({ data, onUpdate }: EditableSectionProps) => {
+const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: EditableSectionProps) => {
   const [hoveredElement, setHoveredElement] = useState<string | null>(null);
 
   const facultyMembers = [
@@ -42,25 +44,36 @@ const EditableSection = ({ data, onUpdate }: EditableSectionProps) => {
     id, 
     children, 
     className = "",
+    style,
     ...props 
   }: { 
     id: string; 
     children: React.ReactNode; 
     className?: string;
+    style?: React.CSSProperties;
   }) => (
     <div
       className={`relative group ${className}`}
+      style={style}
       onMouseEnter={() => setHoveredElement(id)}
       onMouseLeave={() => setHoveredElement(null)}
       {...props}
     >
       {children}
       {hoveredElement === id && (
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button size="sm" variant="secondary" className="h-6 px-2">
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+          <Button 
+            size="sm" 
+            variant="secondary" 
+            className="h-6 px-2"
+            onClick={() => onEditSection(id)}
+          >
             <Edit className="w-3 h-3" />
           </Button>
         </div>
+      )}
+      {editingSection === id && (
+        <div className="absolute inset-0 ring-2 ring-blue-500 ring-opacity-50 pointer-events-none"></div>
       )}
     </div>
   );

@@ -1,18 +1,16 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Eye, Save, Settings, Palette, Type, Image, Layout } from "lucide-react";
+import { ArrowLeft, Eye, Save, Settings, Palette, Type, Layout } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import EditableSection from "@/components/EditableSection";
-import ColorPicker from "@/components/ColorPicker";
+import EditorSidebar from "@/components/EditorSidebar";
 
 const WebsiteEditor = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("content");
+  const [editingSection, setEditingSection] = useState<string | null>(null);
   const [websiteData, setWebsiteData] = useState({
     collegeName: "Springfield University",
     tagline: "Excellence in Education",
@@ -40,12 +38,17 @@ const WebsiteEditor = () => {
     setWebsiteData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleEditSection = (sectionId: string) => {
+    setEditingSection(sectionId);
+    setActiveTab("content"); // Switch to content tab when editing
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* Left Sidebar - Editor Panel */}
       <div className="w-80 bg-white border-r border-slate-200 flex flex-col">
         {/* Header */}
-        <div className="p-4 border-b border-slate-200">
+        <div className="p-4 border-b border-slate-200 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
             <Button 
               variant="ghost" 
@@ -94,160 +97,56 @@ const WebsiteEditor = () => {
           </div>
         </div>
 
-        {/* Editor Content */}
-        <div className="flex-1 overflow-y-auto p-4">
-          {activeTab === "content" && (
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Header Settings</CardTitle>
-                  <CardDescription>Configure your website header</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="collegeName">College Name</Label>
-                    <Input
-                      id="collegeName"
-                      value={websiteData.collegeName}
-                      onChange={(e) => updateWebsiteData("collegeName", e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="tagline">Tagline</Label>
-                    <Input
-                      id="tagline"
-                      value={websiteData.tagline}
-                      onChange={(e) => updateWebsiteData("tagline", e.target.value)}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+        {/* Editor Content with Scroll */}
+        <div className="flex-1 min-h-0">
+          <ScrollArea className="h-full">
+            <div className="p-4">
+              {activeTab === "content" && (
+                <EditorSidebar
+                  editingSection={editingSection}
+                  websiteData={websiteData}
+                  updateWebsiteData={updateWebsiteData}
+                />
+              )}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Hero Section</CardTitle>
-                  <CardDescription>Main banner content</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="heroTitle">Hero Title</Label>
-                    <Input
-                      id="heroTitle"
-                      value={websiteData.heroTitle}
-                      onChange={(e) => updateWebsiteData("heroTitle", e.target.value)}
-                    />
+              {activeTab === "design" && (
+                <div className="space-y-6">
+                  <div className="text-center py-8">
+                    <p className="text-slate-500">Global design settings coming soon</p>
                   </div>
-                  <div>
-                    <Label htmlFor="heroSubtitle">Hero Subtitle</Label>
-                    <Textarea
-                      id="heroSubtitle"
-                      value={websiteData.heroSubtitle}
-                      onChange={(e) => updateWebsiteData("heroSubtitle", e.target.value)}
-                      rows={3}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+              )}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">About Section</CardTitle>
-                  <CardDescription>College information</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="aboutTitle">About Title</Label>
-                    <Input
-                      id="aboutTitle"
-                      value={websiteData.aboutTitle}
-                      onChange={(e) => updateWebsiteData("aboutTitle", e.target.value)}
-                    />
+              {activeTab === "layout" && (
+                <div className="space-y-6">
+                  <div className="text-center py-8">
+                    <p className="text-slate-500">Drag & drop layout editor coming soon</p>
                   </div>
-                  <div>
-                    <Label htmlFor="aboutContent">About Content</Label>
-                    <Textarea
-                      id="aboutContent"
-                      value={websiteData.aboutContent}
-                      onChange={(e) => updateWebsiteData("aboutContent", e.target.value)}
-                      rows={4}
-                    />
+                </div>
+              )}
+
+              {activeTab === "settings" && (
+                <div className="space-y-6">
+                  <div className="text-center py-8">
+                    <p className="text-slate-500">Website settings coming soon</p>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              )}
             </div>
-          )}
-
-          {activeTab === "design" && (
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Color Scheme</CardTitle>
-                  <CardDescription>Customize your website colors</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ColorPicker
-                    label="Primary Color"
-                    value={websiteData.primaryColor}
-                    onChange={(color) => updateWebsiteData("primaryColor", color)}
-                  />
-                  <ColorPicker
-                    label="Secondary Color"
-                    value={websiteData.secondaryColor}
-                    onChange={(color) => updateWebsiteData("secondaryColor", color)}
-                  />
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Typography</CardTitle>
-                  <CardDescription>Font settings</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-slate-500">Typography customization coming soon</p>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {activeTab === "layout" && (
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Section Layout</CardTitle>
-                  <CardDescription>Arrange your website sections</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-slate-500">Drag & drop layout editor coming soon</p>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {activeTab === "settings" && (
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">SEO Settings</CardTitle>
-                  <CardDescription>Search engine optimization</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-slate-500">SEO settings coming soon</p>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+          </ScrollArea>
         </div>
       </div>
 
-      {/* Right Main Area - Live Preview */}
-      <div className="flex-1 bg-white">
-        <div className="h-full overflow-y-auto">
+      {/* Right Main Area - Live Preview with Scroll */}
+      <div className="flex-1 bg-white min-w-0">
+        <ScrollArea className="h-screen">
           <EditableSection 
             data={websiteData}
             onUpdate={updateWebsiteData}
+            onEditSection={handleEditSection}
+            editingSection={editingSection}
           />
-        </div>
+        </ScrollArea>
       </div>
     </div>
   );
