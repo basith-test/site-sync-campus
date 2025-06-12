@@ -1,10 +1,67 @@
 
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Phone, Mail, MapPin, Calendar, Users, Award, ExternalLink } from "lucide-react";
+import { ArrowLeft, Phone, Mail, MapPin, Calendar, Users, Award, ExternalLink, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { websiteDataService, WebsiteData, NavigationItem } from "@/services/websiteDataService";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const WebsitePreview = () => {
   const navigate = useNavigate();
+  const [websiteData, setWebsiteData] = useState<WebsiteData | null>(null);
+
+  useEffect(() => {
+    // Load the saved website data
+    const loadedData = websiteDataService.load();
+    setWebsiteData(loadedData);
+  }, []);
+
+  // Show loading state while data is being loaded
+  if (!websiteData) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-lg">Loading website preview...</div>
+      </div>
+    );
+  }
+
+  const renderNavigationItem = (item: NavigationItem) => {
+    if (item.type === 'dropdown' && item.children && item.children.length > 0) {
+      return (
+        <DropdownMenu key={item.id}>
+          <DropdownMenuTrigger className="text-slate-700 hover:text-blue-600 font-medium flex items-center space-x-1">
+            <span>{item.label}</span>
+            <ChevronDown className="w-4 h-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="bg-white border shadow-lg">
+            {item.children.map((child) => (
+              <DropdownMenuItem key={child.id} asChild>
+                <a href={child.href} className="block px-4 py-2 hover:bg-slate-100">
+                  {child.label}
+                </a>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    }
+
+    return (
+      <a 
+        key={item.id}
+        href={item.href} 
+        className="text-slate-700 hover:text-blue-600 font-medium"
+        {...(item.type === 'external' ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+      >
+        {item.label}
+      </a>
+    );
+  };
 
   const facultyMembers = [
     { name: "Dr. Sarah Johnson", position: "Head of Computer Science", image: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=400" },
@@ -16,12 +73,6 @@ const WebsitePreview = () => {
     { name: "Computer Science & Engineering", duration: "4 Years", seats: "120" },
     { name: "Information Technology", duration: "4 Years", seats: "60" },
     { name: "Data Science", duration: "4 Years", seats: "40" },
-  ];
-
-  const news = [
-    { title: "Springfield University Ranked #1 in State", date: "June 10, 2025", category: "Achievement" },
-    { title: "New AI Research Lab Inaugurated", date: "June 8, 2025", category: "Infrastructure" },
-    { title: "Student Placement Drive 2025", date: "June 5, 2025", category: "Placements" },
   ];
 
   return (
@@ -41,7 +92,7 @@ const WebsitePreview = () => {
           <div className="text-sm">
             <span className="text-slate-300">Preview Mode</span>
             <span className="mx-2">•</span>
-            <span>Springfield University Website</span>
+            <span>{websiteData.collegeName} Website</span>
           </div>
         </div>
         <Button 
@@ -61,42 +112,39 @@ const WebsitePreview = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <img 
-                  src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=60" 
-                  alt="Springfield University Logo" 
+                  src={websiteData.logoUrl} 
+                  alt={`${websiteData.collegeName} Logo`} 
                   className="w-12 h-12 rounded-lg object-cover"
                 />
                 <div>
-                  <h1 className="text-xl font-bold text-blue-900">Springfield University</h1>
-                  <p className="text-sm text-slate-600">Excellence in Education</p>
+                  <h1 className="text-xl font-bold text-blue-900">{websiteData.collegeName}</h1>
+                  <p className="text-sm text-slate-600">{websiteData.tagline}</p>
                 </div>
               </div>
               <nav className="hidden md:flex space-x-8">
-                <a href="#" className="text-slate-700 hover:text-blue-600 font-medium">Home</a>
-                <a href="#" className="text-slate-700 hover:text-blue-600 font-medium">Departments</a>
-                <a href="#" className="text-slate-700 hover:text-blue-600 font-medium">Admissions</a>
-                <a href="#" className="text-slate-700 hover:text-blue-600 font-medium">About</a>
-                <a href="#" className="text-slate-700 hover:text-blue-600 font-medium">Contact</a>
+                {websiteData.navigationItems.map(renderNavigationItem)}
               </nav>
             </div>
           </div>
         </header>
 
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
+        <section 
+          className="text-white py-20"
+          style={{ 
+            background: `linear-gradient(to right, ${websiteData.primaryColor}, ${websiteData.secondaryColor})` 
+          }}
+        >
           <div className="max-w-7xl mx-auto px-6 text-center">
             <h2 className="text-5xl font-bold mb-6">
-              Shaping Tomorrow's Leaders
+              {websiteData.heroTitle}
             </h2>
             <p className="text-xl mb-8 max-w-3xl mx-auto">
-              Join Springfield University, where innovation meets excellence. 
-              Our world-class faculty and cutting-edge facilities prepare students for successful careers.
+              {websiteData.heroSubtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="bg-white text-blue-600 hover:bg-slate-100">
                 Apply Now
-              </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
-                Virtual Tour
               </Button>
             </div>
           </div>
@@ -106,10 +154,9 @@ const WebsitePreview = () => {
         <section className="py-16 bg-slate-50">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-12">
-              <h3 className="text-3xl font-bold text-slate-900 mb-4">About Springfield University</h3>
+              <h3 className="text-3xl font-bold text-slate-900 mb-4">{websiteData.aboutTitle}</h3>
               <p className="text-lg text-slate-600 max-w-3xl mx-auto">
-                Established in 1985, Springfield University has been at the forefront of educational excellence, 
-                fostering innovation, research, and character development for over three decades.
+                {websiteData.aboutContent}
               </p>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
@@ -205,7 +252,7 @@ const WebsitePreview = () => {
               </p>
             </div>
             <div className="grid md:grid-cols-3 gap-6">
-              {news.map((article, index) => (
+              {websiteData.newsItems.map((article, index) => (
                 <div key={index} className="bg-white border border-slate-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-center space-x-2 mb-3">
                     <Calendar className="w-4 h-4 text-slate-400" />
@@ -213,6 +260,7 @@ const WebsitePreview = () => {
                     <span className="text-sm bg-blue-100 text-blue-600 px-2 py-1 rounded">{article.category}</span>
                   </div>
                   <h4 className="text-lg font-semibold text-slate-900 mb-3">{article.title}</h4>
+                  <p className="text-sm text-slate-600 mb-3">{article.content}</p>
                   <Button variant="outline" size="sm">
                     Read More
                   </Button>
@@ -231,47 +279,51 @@ const WebsitePreview = () => {
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
                     <MapPin className="w-4 h-4" />
-                    <span className="text-sm">123 University Ave, Springfield</span>
+                    <span className="text-sm">{websiteData.footerData.contactInfo.address}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Phone className="w-4 h-4" />
-                    <span className="text-sm">+1 (555) 123-4567</span>
+                    <span className="text-sm">{websiteData.footerData.contactInfo.phone}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Mail className="w-4 h-4" />
-                    <span className="text-sm">info@springfield.edu</span>
+                    <span className="text-sm">{websiteData.footerData.contactInfo.email}</span>
                   </div>
                 </div>
               </div>
               <div>
                 <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
                 <ul className="space-y-2 text-sm">
-                  <li><a href="#" className="hover:text-blue-400">Admissions</a></li>
-                  <li><a href="#" className="hover:text-blue-400">Academic Calendar</a></li>
-                  <li><a href="#" className="hover:text-blue-400">Student Portal</a></li>
-                  <li><a href="#" className="hover:text-blue-400">Alumni</a></li>
+                  {websiteData.footerData.quickLinks.map((link, index) => (
+                    <li key={index}>
+                      <a href={link.href} className="hover:text-blue-400">{link.label}</a>
+                    </li>
+                  ))}
                 </ul>
               </div>
               <div>
                 <h4 className="text-lg font-semibold mb-4">Departments</h4>
                 <ul className="space-y-2 text-sm">
-                  <li><a href="#" className="hover:text-blue-400">Computer Science</a></li>
-                  <li><a href="#" className="hover:text-blue-400">Engineering</a></li>
-                  <li><a href="#" className="hover:text-blue-400">Business</a></li>
-                  <li><a href="#" className="hover:text-blue-400">Liberal Arts</a></li>
+                  {websiteData.footerData.departments.map((dept, index) => (
+                    <li key={index}>
+                      <a href={dept.href} className="hover:text-blue-400">{dept.label}</a>
+                    </li>
+                  ))}
                 </ul>
               </div>
               <div>
                 <h4 className="text-lg font-semibold mb-4">Follow Us</h4>
                 <div className="flex space-x-4">
-                  <a href="#" className="hover:text-blue-400">Facebook</a>
-                  <a href="#" className="hover:text-blue-400">Twitter</a>
-                  <a href="#" className="hover:text-blue-400">LinkedIn</a>
+                  {websiteData.footerData.socialMedia.map((social, index) => (
+                    <a key={index} href={social.url} className="hover:text-blue-400">
+                      {social.platform}
+                    </a>
+                  ))}
                 </div>
               </div>
             </div>
             <div className="border-t border-slate-700 mt-8 pt-8 text-center text-sm text-slate-400">
-              <p>&copy; 2025 Springfield University. All rights reserved.</p>
+              <p>&copy; 2025 {websiteData.collegeName}. All rights reserved.</p>
             </div>
           </div>
         </footer>

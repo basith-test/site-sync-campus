@@ -23,7 +23,6 @@ const WebsiteEditor = () => {
   const tabs = [
     { id: "content", label: "Content", icon: Type },
     { id: "design", label: "Design", icon: Palette },
-    { id: "layout", label: "Layout", icon: Layout },
   ];
 
   const handleSave = () => {
@@ -48,9 +47,9 @@ const WebsiteEditor = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-slate-50 flex overflow-hidden">
       {/* Left Sidebar - Editor Panel */}
-      <div className="w-80 bg-white border-r border-slate-200 flex flex-col">
+      <div className="w-80 bg-white border-r border-slate-200 flex flex-col h-screen">
         {/* Header */}
         <div className="p-4 border-b border-slate-200 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
@@ -80,7 +79,7 @@ const WebsiteEditor = () => {
           </div>
           
           {/* Tab Navigation */}
-          <div className="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-lg">
+          <div className="grid grid-cols-2 gap-1 bg-slate-100 p-1 rounded-lg">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -101,48 +100,36 @@ const WebsiteEditor = () => {
           </div>
         </div>
 
-        {/* Editor Content with Scroll */}
-        <div className="flex-1 min-h-0">
-          <ScrollArea className="h-full">
-            <div className="p-4">
-              {activeTab === "content" && (
-                <EditorSidebar
-                  editingSection={editingSection}
-                  websiteData={websiteData}
-                  updateWebsiteData={updateWebsiteData}
-                />
-              )}
+        {/* Editor Content with Independent Scroll */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-4">
+            {activeTab === "content" && (
+              <EditorSidebar
+                editingSection={editingSection}
+                websiteData={websiteData}
+                updateWebsiteData={updateWebsiteData}
+              />
+            )}
 
-              {activeTab === "design" && (
-                <div className="space-y-6">
-                  <div className="text-center py-8">
-                    <p className="text-slate-500">Global design settings coming soon</p>
-                  </div>
+            {activeTab === "design" && (
+              <div className="space-y-6">
+                <div className="text-center py-8">
+                  <p className="text-slate-500">Global design settings coming soon</p>
                 </div>
-              )}
-
-              {activeTab === "layout" && (
-                <div className="space-y-6">
-                  <div className="text-center py-8">
-                    <p className="text-slate-500">Drag & drop layout editor coming soon</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Right Main Area - Live Preview with Scroll */}
-      <div className="flex-1 bg-white min-w-0">
-        <ScrollArea className="h-screen">
-          <EditableSection 
-            data={websiteData}
-            onUpdate={updateWebsiteData}
-            onEditSection={handleEditSection}
-            editingSection={editingSection}
-          />
-        </ScrollArea>
+      {/* Right Main Area - Live Preview with Independent Scroll */}
+      <div className="flex-1 bg-white overflow-y-auto h-screen">
+        <EditableSection 
+          data={websiteData}
+          onUpdate={updateWebsiteData}
+          onEditSection={handleEditSection}
+          editingSection={editingSection}
+        />
       </div>
     </div>
   );

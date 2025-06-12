@@ -1,15 +1,12 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Edit, Phone, Mail, MapPin, Calendar, Users, Award, ExternalLink } from "lucide-react";
-import { WebsiteData } from "@/services/websiteDataService";
-
-interface NavigationItem {
-  id: string;
-  label: string;
-  href: string;
-  type: 'internal' | 'external' | 'dropdown';
-  children?: NavigationItem[];
-}
+import { Edit, Phone, Mail, MapPin, Calendar, Users, Award, ExternalLink, ChevronDown } from "lucide-react";
+import { WebsiteData, NavigationItem } from "@/services/websiteDataService";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface EditableSectionProps {
   data: WebsiteData;
@@ -19,141 +16,117 @@ interface EditableSectionProps {
 }
 
 const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: EditableSectionProps) => {
-  const [hoveredElement, setHoveredElement] = useState<string | null>(null);
+  const renderNavigationItem = (item: NavigationItem) => {
+    // Only show dropdown for items that actually have children
+    if (item.type === 'dropdown' && item.children && item.children.length > 0) {
+      return (
+        <DropdownMenu key={item.id}>
+          <DropdownMenuTrigger className="text-slate-700 hover:text-blue-600 font-medium flex items-center space-x-1 cursor-pointer">
+            <span>{item.label}</span>
+            <ChevronDown className="w-4 h-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="bg-white border shadow-lg z-50">
+            {item.children.map((child) => (
+              <DropdownMenuItem key={child.id} asChild>
+                <a href={child.href} className="block px-4 py-2 hover:bg-slate-100 cursor-pointer">
+                  {child.label}
+                </a>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    }
 
-  const facultyMembers = [
-    { name: "Dr. Sarah Johnson", position: "Head of Computer Science", image: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=400" },
-    { name: "Prof. Michael Chen", position: "Software Engineering", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400" },
-    { name: "Dr. Emily Rodriguez", position: "Data Science", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400" },
-  ];
-
-  const courses = [
-    { name: "Computer Science & Engineering", duration: "4 Years", seats: "120" },
-    { name: "Information Technology", duration: "4 Years", seats: "60" },
-    { name: "Data Science", duration: "4 Years", seats: "40" },
-  ];
-
-  const EditableElement = ({ 
-    id, 
-    children, 
-    className = "",
-    style,
-    ...props 
-  }: { 
-    id: string; 
-    children: React.ReactNode; 
-    className?: string;
-    style?: React.CSSProperties;
-  }) => (
-    <div
-      className={`relative group ${className}`}
-      style={style}
-      onMouseEnter={() => setHoveredElement(id)}
-      onMouseLeave={() => setHoveredElement(null)}
-      {...props}
-    >
-      {children}
-      {hoveredElement === id && (
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-          <Button 
-            size="sm" 
-            variant="secondary" 
-            className="h-6 px-2"
-            onClick={() => onEditSection(id)}
-          >
-            <Edit className="w-3 h-3" />
-          </Button>
-        </div>
-      )}
-      {editingSection === id && (
-        <div className="absolute inset-0 ring-2 ring-blue-500 ring-opacity-50 pointer-events-none"></div>
-      )}
-    </div>
-  );
+    // Regular navigation item (no dropdown)
+    return (
+      <a 
+        key={item.id}
+        href={item.href} 
+        className="text-slate-700 hover:text-blue-600 font-medium"
+        {...(item.type === 'external' ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+      >
+        {item.label}
+      </a>
+    );
+  };
 
   return (
-    <div className="bg-white">
-      {/* Header */}
-      <EditableElement id="header" className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <img 
-                src={data.logoUrl} 
-                alt="College Logo" 
-                className="w-12 h-12 rounded-lg object-cover"
-              />
-              <div>
-                <h1 
-                  className="text-xl font-bold"
-                  style={{ color: data.primaryColor }}
-                >
-                  {data.collegeName}
-                </h1>
-                <p className="text-sm text-slate-600">{data.tagline}</p>
-              </div>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              {data.navigationItems.map((item) => (
-                <div key={item.id} className="relative group">
-                  <a 
-                    href={item.href} 
-                    className="text-slate-700 hover:text-blue-600 font-medium flex items-center"
-                    target={item.type === 'external' ? '_blank' : undefined}
-                    rel={item.type === 'external' ? 'noopener noreferrer' : undefined}
-                  >
-                    {item.label}
-                    {item.type === 'dropdown' && item.children && (
-                      <span className="ml-1 text-xs">▼</span>
-                    )}
-                  </a>
-                  {item.type === 'dropdown' && item.children && (
-                    <div className="absolute top-full left-0 bg-white shadow-lg border rounded-md py-2 min-w-48 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                      {item.children.map((child) => (
-                        <a
-                          key={child.id}
-                          href={child.href}
-                          className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
-                          target={child.type === 'external' ? '_blank' : undefined}
-                          rel={child.type === 'external' ? 'noopener noreferrer' : undefined}
-                        >
-                          {child.label}
-                        </a>
-                      ))}
-                    </div>
-                  )}
+    <div className="bg-white min-h-screen">
+      {/* Header Section */}
+      <section 
+        className={`relative group ${editingSection === 'header' ? 'ring-2 ring-blue-500' : ''}`}
+        onMouseEnter={() => {}}
+        onMouseLeave={() => {}}
+      >
+        <header className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <img 
+                  src={data.logoUrl} 
+                  alt={`${data.collegeName} Logo`} 
+                  className="w-12 h-12 rounded-lg object-cover"
+                />
+                <div>
+                  <h1 className="text-xl font-bold text-blue-900">{data.collegeName}</h1>
+                  <p className="text-sm text-slate-600">{data.tagline}</p>
                 </div>
-              ))}
-            </nav>
+              </div>
+              <nav className="hidden md:flex space-x-8">
+                {data.navigationItems.map(renderNavigationItem)}
+              </nav>
+            </div>
           </div>
-        </div>
-      </EditableElement>
+        </header>
+        
+        {/* Edit Button */}
+        <Button
+          onClick={() => onEditSection('header')}
+          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          size="sm"
+        >
+          <Edit className="w-4 h-4 mr-1" />
+          Edit Header
+        </Button>
+      </section>
 
       {/* Hero Section */}
-      <EditableElement 
-        id="hero" 
-        className="text-white py-20"
+      <section 
+        className={`relative group ${editingSection === 'hero' ? 'ring-2 ring-blue-500' : ''}`}
         style={{ 
-          background: `linear-gradient(to right, ${data.primaryColor}, ${data.primaryColor}dd)` 
+          background: `linear-gradient(to right, ${data.primaryColor}, ${data.secondaryColor})` 
         }}
       >
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-5xl font-bold mb-6">
-            {data.heroTitle}
-          </h2>
-          <p className="text-xl mb-8 max-w-3xl mx-auto">
-            {data.heroSubtitle}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100">
-              Apply Now
-            </Button>
+        <div className="text-white py-20">
+          <div className="max-w-7xl mx-auto px-6 text-center">
+            <h2 className="text-5xl font-bold mb-6">
+              {data.heroTitle}
+            </h2>
+            <p className="text-xl mb-8 max-w-3xl mx-auto">
+              {data.heroSubtitle}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="bg-white text-blue-600 hover:bg-slate-100">
+                Apply Now
+              </Button>
+            </div>
           </div>
         </div>
-      </EditableElement>
+        
+        {/* Edit Button */}
+        <Button
+          onClick={() => onEditSection('hero')}
+          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          size="sm"
+        >
+          <Edit className="w-4 h-4 mr-1" />
+          Edit Hero
+        </Button>
+      </section>
 
       {/* About Section */}
-      <EditableElement id="about" className="py-16 bg-slate-50">
+      <section className={`py-16 bg-slate-50 relative group ${editingSection === 'about' ? 'ring-2 ring-blue-500' : ''}`}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h3 className="text-3xl font-bold text-slate-900 mb-4">{data.aboutTitle}</h3>
@@ -161,23 +134,18 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
               {data.aboutContent}
             </p>
           </div>
+          
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div 
-                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                style={{ backgroundColor: `${data.primaryColor}20` }}
-              >
-                <Users className="w-8 h-8" style={{ color: data.primaryColor }} />
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-blue-600" />
               </div>
               <h4 className="text-xl font-semibold mb-2">10,000+ Students</h4>
               <p className="text-slate-600">Diverse student body from across the globe</p>
             </div>
             <div className="text-center">
-              <div 
-                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                style={{ backgroundColor: `${data.secondaryColor}20` }}
-              >
-                <Award className="w-8 h-8" style={{ color: data.secondaryColor }} />
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Award className="w-8 h-8 text-green-600" />
               </div>
               <h4 className="text-xl font-semibold mb-2">Top Rankings</h4>
               <p className="text-slate-600">Consistently ranked among top universities</p>
@@ -191,71 +159,20 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
             </div>
           </div>
         </div>
-      </EditableElement>
-
-      {/* Courses Section */}
-      <EditableElement id="courses" className="py-16">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-slate-900 mb-4">Academic Programs</h3>
-            <p className="text-lg text-slate-600">
-              Explore our comprehensive range of undergraduate and graduate programs
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {courses.map((course, index) => (
-              <div key={index} className="bg-white border border-slate-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-                <h4 className="text-xl font-semibold text-slate-900 mb-3">{course.name}</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Duration:</span>
-                    <span className="font-medium">{course.duration}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Seats:</span>
-                    <span className="font-medium">{course.seats}</span>
-                  </div>
-                </div>
-                <Button 
-                  className="w-full mt-4" 
-                  variant="outline"
-                  style={{ borderColor: data.primaryColor, color: data.primaryColor }}
-                >
-                  Learn More
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </EditableElement>
-
-      {/* Faculty Section */}
-      <EditableElement id="faculty" className="py-16 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-slate-900 mb-4">Our Faculty</h3>
-            <p className="text-lg text-slate-600">
-              Learn from industry experts and renowned academics
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {facultyMembers.map((faculty, index) => (
-              <div key={index} className="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow">
-                <img 
-                  src={faculty.image} 
-                  alt={faculty.name}
-                  className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
-                />
-                <h4 className="text-xl font-semibold text-slate-900 mb-2">{faculty.name}</h4>
-                <p className="text-slate-600">{faculty.position}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </EditableElement>
+        
+        {/* Edit Button */}
+        <Button
+          onClick={() => onEditSection('about')}
+          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          size="sm"
+        >
+          <Edit className="w-4 h-4 mr-1" />
+          Edit About
+        </Button>
+      </section>
 
       {/* News Section */}
-      <EditableElement id="news" className="py-16">
+      <section className={`py-16 relative group ${editingSection === 'news' ? 'ring-2 ring-blue-500' : ''}`}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h3 className="text-3xl font-bold text-slate-900 mb-4">Latest News</h3>
@@ -265,16 +182,11 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {data.newsItems.map((article, index) => (
-              <div key={article.id} className="bg-white border border-slate-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+              <div key={index} className="bg-white border border-slate-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
                 <div className="flex items-center space-x-2 mb-3">
                   <Calendar className="w-4 h-4 text-slate-400" />
                   <span className="text-sm text-slate-500">{article.date}</span>
-                  <span 
-                    className="text-sm px-2 py-1 rounded text-white"
-                    style={{ backgroundColor: data.primaryColor }}
-                  >
-                    {article.category}
-                  </span>
+                  <span className="text-sm bg-blue-100 text-blue-600 px-2 py-1 rounded">{article.category}</span>
                 </div>
                 <h4 className="text-lg font-semibold text-slate-900 mb-3">{article.title}</h4>
                 <p className="text-sm text-slate-600 mb-3">{article.content}</p>
@@ -285,10 +197,20 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
             ))}
           </div>
         </div>
-      </EditableElement>
+        
+        {/* Edit Button */}
+        <Button
+          onClick={() => onEditSection('news')}
+          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          size="sm"
+        >
+          <Edit className="w-4 h-4 mr-1" />
+          Edit News
+        </Button>
+      </section>
 
-      {/* Footer */}
-      <EditableElement id="footer" className="bg-slate-900 text-white py-12">
+      {/* Footer Section */}
+      <section className={`bg-slate-900 text-white py-12 relative group ${editingSection === 'footer' ? 'ring-2 ring-blue-500' : ''}`}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
@@ -312,7 +234,9 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
               <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2 text-sm">
                 {data.footerData.quickLinks.map((link, index) => (
-                  <li key={index}><a href={link.href} className="hover:text-blue-400">{link.label}</a></li>
+                  <li key={index}>
+                    <a href={link.href} className="hover:text-blue-400">{link.label}</a>
+                  </li>
                 ))}
               </ul>
             </div>
@@ -320,7 +244,9 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
               <h4 className="text-lg font-semibold mb-4">Departments</h4>
               <ul className="space-y-2 text-sm">
                 {data.footerData.departments.map((dept, index) => (
-                  <li key={index}><a href={dept.href} className="hover:text-blue-400">{dept.label}</a></li>
+                  <li key={index}>
+                    <a href={dept.href} className="hover:text-blue-400">{dept.label}</a>
+                  </li>
                 ))}
               </ul>
             </div>
@@ -328,7 +254,9 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
               <h4 className="text-lg font-semibold mb-4">Follow Us</h4>
               <div className="flex space-x-4">
                 {data.footerData.socialMedia.map((social, index) => (
-                  <a key={index} href={social.url} className="hover:text-blue-400">{social.platform}</a>
+                  <a key={index} href={social.url} className="hover:text-blue-400">
+                    {social.platform}
+                  </a>
                 ))}
               </div>
             </div>
@@ -337,7 +265,17 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
             <p>&copy; 2025 {data.collegeName}. All rights reserved.</p>
           </div>
         </div>
-      </EditableElement>
+        
+        {/* Edit Button */}
+        <Button
+          onClick={() => onEditSection('footer')}
+          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          size="sm"
+        >
+          <Edit className="w-4 h-4 mr-1" />
+          Edit Footer
+        </Button>
+      </section>
     </div>
   );
 };
