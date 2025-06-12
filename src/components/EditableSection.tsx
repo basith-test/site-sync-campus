@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Edit, Phone, Mail, MapPin, Calendar, Users, Award, ExternalLink } from "lucide-react";
+import { WebsiteData } from "@/services/websiteDataService";
 
 interface NavigationItem {
   id: string;
@@ -11,18 +12,8 @@ interface NavigationItem {
 }
 
 interface EditableSectionProps {
-  data: {
-    collegeName: string;
-    tagline: string;
-    heroTitle: string;
-    heroSubtitle: string;
-    aboutTitle: string;
-    aboutContent: string;
-    primaryColor: string;
-    secondaryColor: string;
-    navigationItems?: NavigationItem[];
-  };
-  onUpdate: (field: string, value: string | NavigationItem[]) => void;
+  data: WebsiteData;
+  onUpdate: (field: string, value: any) => void;
   onEditSection: (sectionId: string) => void;
   editingSection: string | null;
 }
@@ -40,12 +31,6 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
     { name: "Computer Science & Engineering", duration: "4 Years", seats: "120" },
     { name: "Information Technology", duration: "4 Years", seats: "60" },
     { name: "Data Science", duration: "4 Years", seats: "40" },
-  ];
-
-  const news = [
-    { title: "Springfield University Ranked #1 in State", date: "June 10, 2025", category: "Achievement" },
-    { title: "New AI Research Lab Inaugurated", date: "June 8, 2025", category: "Infrastructure" },
-    { title: "Student Placement Drive 2025", date: "June 5, 2025", category: "Placements" },
   ];
 
   const EditableElement = ({ 
@@ -86,16 +71,6 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
     </div>
   );
 
-  const defaultNavigationItems: NavigationItem[] = [
-    { id: 'home', label: 'Home', href: '#', type: 'internal' },
-    { id: 'departments', label: 'Departments', href: '#', type: 'dropdown' },
-    { id: 'admissions', label: 'Admissions', href: '#', type: 'internal' },
-    { id: 'about', label: 'About', href: '#', type: 'internal' },
-    { id: 'contact', label: 'Contact', href: '#', type: 'internal' },
-  ];
-
-  const navigationItems = data.navigationItems || defaultNavigationItems;
-
   return (
     <div className="bg-white">
       {/* Header */}
@@ -104,7 +79,7 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <img 
-                src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=60" 
+                src={data.logoUrl} 
                 alt="College Logo" 
                 className="w-12 h-12 rounded-lg object-cover"
               />
@@ -119,16 +94,35 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
               </div>
             </div>
             <nav className="hidden md:flex space-x-8">
-              {navigationItems.map((item) => (
-                <a 
-                  key={item.id}
-                  href={item.href} 
-                  className="text-slate-700 hover:text-blue-600 font-medium"
-                  target={item.type === 'external' ? '_blank' : undefined}
-                  rel={item.type === 'external' ? 'noopener noreferrer' : undefined}
-                >
-                  {item.label}
-                </a>
+              {data.navigationItems.map((item) => (
+                <div key={item.id} className="relative group">
+                  <a 
+                    href={item.href} 
+                    className="text-slate-700 hover:text-blue-600 font-medium flex items-center"
+                    target={item.type === 'external' ? '_blank' : undefined}
+                    rel={item.type === 'external' ? 'noopener noreferrer' : undefined}
+                  >
+                    {item.label}
+                    {item.type === 'dropdown' && item.children && (
+                      <span className="ml-1 text-xs">▼</span>
+                    )}
+                  </a>
+                  {item.type === 'dropdown' && item.children && (
+                    <div className="absolute top-full left-0 bg-white shadow-lg border rounded-md py-2 min-w-48 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                      {item.children.map((child) => (
+                        <a
+                          key={child.id}
+                          href={child.href}
+                          className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                          target={child.type === 'external' ? '_blank' : undefined}
+                          rel={child.type === 'external' ? 'noopener noreferrer' : undefined}
+                        >
+                          {child.label}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </nav>
           </div>
@@ -153,9 +147,6 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100">
               Apply Now
-            </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-slate-900">
-              Virtual Tour
             </Button>
           </div>
         </div>
@@ -273,8 +264,8 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {news.map((article, index) => (
-              <div key={index} className="bg-white border border-slate-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+            {data.newsItems.map((article, index) => (
+              <div key={article.id} className="bg-white border border-slate-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
                 <div className="flex items-center space-x-2 mb-3">
                   <Calendar className="w-4 h-4 text-slate-400" />
                   <span className="text-sm text-slate-500">{article.date}</span>
@@ -286,6 +277,7 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
                   </span>
                 </div>
                 <h4 className="text-lg font-semibold text-slate-900 mb-3">{article.title}</h4>
+                <p className="text-sm text-slate-600 mb-3">{article.content}</p>
                 <Button variant="outline" size="sm">
                   Read More
                 </Button>
@@ -304,42 +296,40 @@ const EditableSection = ({ data, onUpdate, onEditSection, editingSection }: Edit
               <div className="space-y-3">
                 <div className="flex items-center space-x-2">
                   <MapPin className="w-4 h-4" />
-                  <span className="text-sm">123 University Ave, Springfield</span>
+                  <span className="text-sm">{data.footerData.contactInfo.address}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Phone className="w-4 h-4" />
-                  <span className="text-sm">+1 (555) 123-4567</span>
+                  <span className="text-sm">{data.footerData.contactInfo.phone}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Mail className="w-4 h-4" />
-                  <span className="text-sm">info@springfield.edu</span>
+                  <span className="text-sm">{data.footerData.contactInfo.email}</span>
                 </div>
               </div>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-blue-400">Admissions</a></li>
-                <li><a href="#" className="hover:text-blue-400">Academic Calendar</a></li>
-                <li><a href="#" className="hover:text-blue-400">Student Portal</a></li>
-                <li><a href="#" className="hover:text-blue-400">Alumni</a></li>
+                {data.footerData.quickLinks.map((link, index) => (
+                  <li key={index}><a href={link.href} className="hover:text-blue-400">{link.label}</a></li>
+                ))}
               </ul>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">Departments</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-blue-400">Computer Science</a></li>
-                <li><a href="#" className="hover:text-blue-400">Engineering</a></li>
-                <li><a href="#" className="hover:text-blue-400">Business</a></li>
-                <li><a href="#" className="hover:text-blue-400">Liberal Arts</a></li>
+                {data.footerData.departments.map((dept, index) => (
+                  <li key={index}><a href={dept.href} className="hover:text-blue-400">{dept.label}</a></li>
+                ))}
               </ul>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">Follow Us</h4>
               <div className="flex space-x-4">
-                <a href="#" className="hover:text-blue-400">Facebook</a>
-                <a href="#" className="hover:text-blue-400">Twitter</a>
-                <a href="#" className="hover:text-blue-400">LinkedIn</a>
+                {data.footerData.socialMedia.map((social, index) => (
+                  <a key={index} href={social.url} className="hover:text-blue-400">{social.platform}</a>
+                ))}
               </div>
             </div>
           </div>

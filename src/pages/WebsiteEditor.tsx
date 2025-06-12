@@ -1,55 +1,45 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Eye, Save, Settings, Palette, Type, Layout } from "lucide-react";
+import { ArrowLeft, Eye, Save, Palette, Type, Layout } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import EditableSection from "@/components/EditableSection";
 import EditorSidebar from "@/components/EditorSidebar";
-
-interface NavigationItem {
-  id: string;
-  label: string;
-  href: string;
-  type: 'internal' | 'external' | 'dropdown';
-  children?: NavigationItem[];
-}
+import { websiteDataService, WebsiteData } from "@/services/websiteDataService";
 
 const WebsiteEditor = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("content");
   const [editingSection, setEditingSection] = useState<string | null>(null);
-  const [websiteData, setWebsiteData] = useState({
-    collegeName: "Springfield University",
-    tagline: "Excellence in Education",
-    heroTitle: "Shaping Tomorrow's Leaders",
-    heroSubtitle: "Join Springfield University, where innovation meets excellence. Our world-class faculty and cutting-edge facilities prepare students for successful careers.",
-    aboutTitle: "About Springfield University",
-    aboutContent: "Established in 1985, Springfield University has been at the forefront of educational excellence, fostering innovation, research, and character development for over three decades.",
-    primaryColor: "#2563eb",
-    secondaryColor: "#10b981",
-    navigationItems: [
-      { id: 'home', label: 'Home', href: '#', type: 'internal' as const },
-      { id: 'departments', label: 'Departments', href: '#', type: 'dropdown' as const },
-      { id: 'admissions', label: 'Admissions', href: '#', type: 'internal' as const },
-      { id: 'about', label: 'About', href: '#', type: 'internal' as const },
-      { id: 'contact', label: 'Contact', href: '#', type: 'internal' as const },
-    ] as NavigationItem[],
-  });
+  const [websiteData, setWebsiteData] = useState<WebsiteData>(websiteDataService.load());
+
+  useEffect(() => {
+    // Load data on component mount
+    const loadedData = websiteDataService.load();
+    setWebsiteData(loadedData);
+  }, []);
 
   const tabs = [
     { id: "content", label: "Content", icon: Type },
     { id: "design", label: "Design", icon: Palette },
     { id: "layout", label: "Layout", icon: Layout },
-    { id: "settings", label: "Settings", icon: Settings },
   ];
 
   const handleSave = () => {
+    websiteDataService.save(websiteData);
     console.log("Saving website data:", websiteData);
-    // Here would be the save logic
+    // Show success feedback
+    alert("Website saved successfully!");
   };
 
-  const updateWebsiteData = (field: string, value: string | NavigationItem[]) => {
-    setWebsiteData(prev => ({ ...prev, [field]: value }));
+  const updateWebsiteData = (field: string, value: any) => {
+    setWebsiteData(prev => {
+      const updated = { ...prev, [field]: value };
+      // Auto-save on every change for better UX
+      websiteDataService.save(updated);
+      return updated;
+    });
   };
 
   const handleEditSection = (sectionId: string) => {
@@ -90,7 +80,7 @@ const WebsiteEditor = () => {
           </div>
           
           {/* Tab Navigation */}
-          <div className="grid grid-cols-4 gap-1 bg-slate-100 p-1 rounded-lg">
+          <div className="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-lg">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -135,14 +125,6 @@ const WebsiteEditor = () => {
                 <div className="space-y-6">
                   <div className="text-center py-8">
                     <p className="text-slate-500">Drag & drop layout editor coming soon</p>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "settings" && (
-                <div className="space-y-6">
-                  <div className="text-center py-8">
-                    <p className="text-slate-500">Website settings coming soon</p>
                   </div>
                 </div>
               )}

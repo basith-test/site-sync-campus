@@ -2,8 +2,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import ColorPicker from "./ColorPicker";
 import NavigationEditor from "./NavigationEditor";
+import { Upload } from "lucide-react";
+import { WebsiteData } from "@/services/websiteDataService";
 
 interface NavigationItem {
   id: string;
@@ -15,28 +18,22 @@ interface NavigationItem {
 
 interface EditorSidebarProps {
   editingSection: string | null;
-  websiteData: {
-    collegeName: string;
-    tagline: string;
-    heroTitle: string;
-    heroSubtitle: string;
-    aboutTitle: string;
-    aboutContent: string;
-    primaryColor: string;
-    secondaryColor: string;
-    navigationItems?: NavigationItem[];
-  };
-  updateWebsiteData: (field: string, value: string | NavigationItem[]) => void;
+  websiteData: WebsiteData;
+  updateWebsiteData: (field: string, value: any) => void;
 }
 
 const EditorSidebar = ({ editingSection, websiteData, updateWebsiteData }: EditorSidebarProps) => {
-  const defaultNavigationItems: NavigationItem[] = [
-    { id: 'home', label: 'Home', href: '#', type: 'internal' },
-    { id: 'departments', label: 'Departments', href: '#', type: 'dropdown' },
-    { id: 'admissions', label: 'Admissions', href: '#', type: 'internal' },
-    { id: 'about', label: 'About', href: '#', type: 'internal' },
-    { id: 'contact', label: 'Contact', href: '#', type: 'internal' },
-  ];
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        updateWebsiteData("logoUrl", result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   if (!editingSection) {
     return (
@@ -76,6 +73,33 @@ const EditorSidebar = ({ editingSection, websiteData, updateWebsiteData }: Edito
                     onChange={(e) => updateWebsiteData("tagline", e.target.value)}
                   />
                 </div>
+                <div>
+                  <Label htmlFor="logo">College Logo</Label>
+                  <div className="flex items-center space-x-2">
+                    <img 
+                      src={websiteData.logoUrl} 
+                      alt="Logo preview" 
+                      className="w-12 h-12 rounded object-cover border"
+                    />
+                    <div className="flex-1">
+                      <Input
+                        id="logo"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={() => document.getElementById('logo')?.click()}
+                        className="w-full"
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        Upload New Logo
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
@@ -86,7 +110,7 @@ const EditorSidebar = ({ editingSection, websiteData, updateWebsiteData }: Edito
               </CardHeader>
               <CardContent>
                 <NavigationEditor
-                  items={websiteData.navigationItems || defaultNavigationItems}
+                  items={websiteData.navigationItems}
                   onUpdate={(items) => updateWebsiteData("navigationItems", items)}
                 />
               </CardContent>
@@ -136,7 +160,7 @@ const EditorSidebar = ({ editingSection, websiteData, updateWebsiteData }: Edito
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">About Section</CardTitle>
-                <CardDescription>College information</CardDescription>
+                <CardDescription>College information and content</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -153,39 +177,14 @@ const EditorSidebar = ({ editingSection, websiteData, updateWebsiteData }: Edito
                     id="aboutContent"
                     value={websiteData.aboutContent}
                     onChange={(e) => updateWebsiteData("aboutContent", e.target.value)}
-                    rows={4}
+                    rows={6}
                   />
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        );
-
-      case "courses":
-        return (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Courses Section</CardTitle>
-                <CardDescription>Academic programs configuration</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-slate-500">Course data is automatically synchronized from your CMS. Layout and display options coming soon.</p>
-              </CardContent>
-            </Card>
-          </div>
-        );
-
-      case "faculty":
-        return (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Faculty Section</CardTitle>
-                <CardDescription>Faculty information settings</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-slate-500">Faculty data is automatically synchronized from your CMS. Display customization options coming soon.</p>
+                <ColorPicker
+                  label="Section Background Color"
+                  value="#f8fafc"
+                  onChange={(color) => console.log("About background color:", color)}
+                />
               </CardContent>
             </Card>
           </div>
@@ -197,10 +196,83 @@ const EditorSidebar = ({ editingSection, websiteData, updateWebsiteData }: Edito
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">News Section</CardTitle>
-                <CardDescription>News and events settings</CardDescription>
+                <CardDescription>Manage news articles and announcements</CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-slate-500">News data is automatically synchronized from your CMS. Display customization options coming soon.</p>
+              <CardContent className="space-y-4">
+                <div className="space-y-4">
+                  {websiteData.newsItems.map((item, index) => (
+                    <div key={item.id} className="border rounded p-3">
+                      <div className="space-y-2">
+                        <div>
+                          <Label htmlFor={`news-title-${index}`}>Title</Label>
+                          <Input
+                            id={`news-title-${index}`}
+                            value={item.title}
+                            onChange={(e) => {
+                              const updated = [...websiteData.newsItems];
+                              updated[index] = { ...item, title: e.target.value };
+                              updateWebsiteData("newsItems", updated);
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`news-content-${index}`}>Content</Label>
+                          <Textarea
+                            id={`news-content-${index}`}
+                            value={item.content}
+                            onChange={(e) => {
+                              const updated = [...websiteData.newsItems];
+                              updated[index] = { ...item, content: e.target.value };
+                              updateWebsiteData("newsItems", updated);
+                            }}
+                            rows={2}
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label htmlFor={`news-date-${index}`}>Date</Label>
+                            <Input
+                              id={`news-date-${index}`}
+                              value={item.date}
+                              onChange={(e) => {
+                                const updated = [...websiteData.newsItems];
+                                updated[index] = { ...item, date: e.target.value };
+                                updateWebsiteData("newsItems", updated);
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`news-category-${index}`}>Category</Label>
+                            <Input
+                              id={`news-category-${index}`}
+                              value={item.category}
+                              onChange={(e) => {
+                                const updated = [...websiteData.newsItems];
+                                updated[index] = { ...item, category: e.target.value };
+                                updateWebsiteData("newsItems", updated);
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  onClick={() => {
+                    const newItem = {
+                      id: `news-${Date.now()}`,
+                      title: "New Article",
+                      content: "Article content...",
+                      date: new Date().toLocaleDateString(),
+                      category: "News"
+                    };
+                    updateWebsiteData("newsItems", [...websiteData.newsItems, newItem]);
+                  }}
+                  className="w-full"
+                >
+                  Add News Item
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -212,10 +284,86 @@ const EditorSidebar = ({ editingSection, websiteData, updateWebsiteData }: Edito
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Footer Section</CardTitle>
-                <CardDescription>Footer content and links</CardDescription>
+                <CardDescription>Footer content and social media links</CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-slate-500">Footer customization options coming soon.</p>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label>Contact Information</Label>
+                  <div className="space-y-2 mt-2">
+                    <Input
+                      placeholder="Address"
+                      value={websiteData.footerData.contactInfo.address}
+                      onChange={(e) => updateWebsiteData("footerData", {
+                        ...websiteData.footerData,
+                        contactInfo: { ...websiteData.footerData.contactInfo, address: e.target.value }
+                      })}
+                    />
+                    <Input
+                      placeholder="Phone"
+                      value={websiteData.footerData.contactInfo.phone}
+                      onChange={(e) => updateWebsiteData("footerData", {
+                        ...websiteData.footerData,
+                        contactInfo: { ...websiteData.footerData.contactInfo, phone: e.target.value }
+                      })}
+                    />
+                    <Input
+                      placeholder="Email"
+                      value={websiteData.footerData.contactInfo.email}
+                      onChange={(e) => updateWebsiteData("footerData", {
+                        ...websiteData.footerData,
+                        contactInfo: { ...websiteData.footerData.contactInfo, email: e.target.value }
+                      })}
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <Label>Social Media Links</Label>
+                  <div className="space-y-2 mt-2">
+                    {websiteData.footerData.socialMedia.map((social, index) => (
+                      <div key={index} className="grid grid-cols-2 gap-2">
+                        <Input
+                          placeholder="Platform"
+                          value={social.platform}
+                          onChange={(e) => {
+                            const updated = [...websiteData.footerData.socialMedia];
+                            updated[index] = { ...social, platform: e.target.value };
+                            updateWebsiteData("footerData", {
+                              ...websiteData.footerData,
+                              socialMedia: updated
+                            });
+                          }}
+                        />
+                        <Input
+                          placeholder="URL"
+                          value={social.url}
+                          onChange={(e) => {
+                            const updated = [...websiteData.footerData.socialMedia];
+                            updated[index] = { ...social, url: e.target.value };
+                            updateWebsiteData("footerData", {
+                              ...websiteData.footerData,
+                              socialMedia: updated
+                            });
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const newSocial = { platform: "New Platform", url: "#", icon: "link" };
+                      updateWebsiteData("footerData", {
+                        ...websiteData.footerData,
+                        socialMedia: [...websiteData.footerData.socialMedia, newSocial]
+                      });
+                    }}
+                    className="mt-2"
+                  >
+                    Add Social Media
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>

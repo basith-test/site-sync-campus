@@ -3,9 +3,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2, Plus, GripVertical, Edit, Save, X } from "lucide-react";
+import DropdownMenuEditor from "./DropdownMenuEditor";
 
 interface NavigationItem {
   id: string;
@@ -90,11 +91,7 @@ const NavigationEditor = ({ items, onUpdate }: NavigationEditorProps) => {
     setDraggedItem(null);
   };
 
-  const saveEdit = (itemId: string) => {
-    setEditingItem(null);
-  };
-
-  const cancelEdit = () => {
+  const saveEdit = () => {
     setEditingItem(null);
   };
 
@@ -178,14 +175,23 @@ const NavigationEditor = ({ items, onUpdate }: NavigationEditorProps) => {
                       </div>
                     </div>
                     <div className="flex flex-col space-y-1">
-                      <Button size="sm" onClick={() => saveEdit(item.id)}>
+                      <Button size="sm" onClick={saveEdit}>
                         <Save className="w-3 h-3" />
                       </Button>
-                      <Button size="sm" variant="outline" onClick={cancelEdit}>
+                      <Button size="sm" variant="outline" onClick={() => setEditingItem(null)}>
                         <X className="w-3 h-3" />
                       </Button>
                     </div>
                   </div>
+                  
+                  {item.type === 'dropdown' && (
+                    <div className="mt-4 border-t pt-4">
+                      <DropdownMenuEditor
+                        item={item}
+                        onUpdate={(updatedItem) => updateNavigationItem(item.id, updatedItem)}
+                      />
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="flex items-center justify-between">
@@ -198,6 +204,11 @@ const NavigationEditor = ({ items, onUpdate }: NavigationEditorProps) => {
                         <span className="ml-2 px-1 py-0.5 bg-gray-100 rounded text-xs">
                           {item.type}
                         </span>
+                        {item.type === 'dropdown' && item.children && (
+                          <span className="ml-1 text-xs text-blue-600">
+                            ({item.children.length} items)
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
