@@ -1,25 +1,23 @@
 
-import React, { useState, useEffect, useContext } from "react";
-import Button from "../NecttosComp/Button/Button";
-import { NecttosContext } from "../context/NecttosContext";
+import React, { useState, useEffect } from "react";
+import Button from "./components/Button";
+import { useNecttos } from "./context/NecttosContext";
 import EditableSection from "./components/EditableSection";
 import EditorSidebar from "./components/EditorSidebar";
 import { websiteDataService, WebsiteData } from "./services/websiteDataService";
 
 const WebsiteEditor: React.FC = () => {
-  const { college, collegeId } = useContext(NecttosContext);
+  const { college, collegeId } = useNecttos();
   const [activeTab, setActiveTab] = useState<"content" | "design">("content");
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [websiteData, setWebsiteData] = useState<WebsiteData>(websiteDataService.load());
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    // Initialize with college data if available
     if (college && college.name) {
       const initialData = {
         ...websiteDataService.load(),
         collegeName: college.name || websiteData.collegeName,
-        // Add other college data mappings here
       };
       setWebsiteData(initialData);
     }
@@ -35,7 +33,6 @@ const WebsiteEditor: React.FC = () => {
     try {
       websiteDataService.save(websiteData);
       console.log("Saving website data:", websiteData);
-      // You can integrate with your existing toast system here
       alert("Website saved successfully!");
     } catch (error) {
       console.error("Error saving website:", error);
@@ -48,7 +45,6 @@ const WebsiteEditor: React.FC = () => {
   const updateWebsiteData = (field: string, value: any) => {
     setWebsiteData(prev => {
       const updated = { ...prev, [field]: value };
-      // Auto-save on every change for better UX
       websiteDataService.save(updated);
       return updated;
     });
@@ -56,14 +52,12 @@ const WebsiteEditor: React.FC = () => {
 
   const handleEditSection = (sectionId: string) => {
     setEditingSection(sectionId);
-    setActiveTab("content"); // Switch to content tab when editing
+    setActiveTab("content");
   };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex overflow-hidden">
-      {/* Left Sidebar - Editor Panel */}
       <div className="w-80 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col h-screen">
-        {/* Header */}
         <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
             <div className="text-sm text-slate-600 dark:text-slate-400">
@@ -74,7 +68,6 @@ const WebsiteEditor: React.FC = () => {
             </Button>
           </div>
           
-          {/* Tab Navigation */}
           <div className="grid grid-cols-2 gap-1 bg-slate-100 dark:bg-slate-700 p-1 rounded-lg">
             {tabs.map((tab) => (
               <button
@@ -93,7 +86,6 @@ const WebsiteEditor: React.FC = () => {
           </div>
         </div>
 
-        {/* Editor Content with Independent Scroll */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-4">
             {activeTab === "content" && (
@@ -115,7 +107,6 @@ const WebsiteEditor: React.FC = () => {
         </div>
       </div>
 
-      {/* Right Main Area - Live Preview with Independent Scroll */}
       <div className="flex-1 bg-white dark:bg-slate-900 overflow-y-auto h-screen">
         <EditableSection 
           data={websiteData}

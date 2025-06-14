@@ -1,6 +1,7 @@
+
 import React from 'react';
-import Button from '../../NecttosComp/Button/Button';
-import Input from '../../NecttosComp/Input/Input';
+import Button from './Button';
+import Input from './Input';
 import NavigationEditor from './NavigationEditor';
 import { WebsiteData } from '../services/websiteDataService';
 
@@ -123,11 +124,21 @@ const EditorSidebar: React.FC<EditorSidebarProps> = ({ editingSection, websiteDa
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-2 dark:text-white">Background Color</label>
+                  <label className="block text-sm font-medium mb-2 dark:text-white">Primary Color</label>
                   <input
                     type="color"
                     value={websiteData.primaryColor}
                     onChange={(e) => updateWebsiteData("primaryColor", e.target.value)}
+                    className="w-full h-10 border rounded dark:border-slate-600"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-2 dark:text-white">Secondary Color</label>
+                  <input
+                    type="color"
+                    value={websiteData.secondaryColor}
+                    onChange={(e) => updateWebsiteData("secondaryColor", e.target.value)}
                     className="w-full h-10 border rounded dark:border-slate-600"
                   />
                 </div>
