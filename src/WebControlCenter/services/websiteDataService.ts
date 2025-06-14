@@ -1,5 +1,7 @@
 
-interface NavigationItem {
+import { v4 as uuidv4 } from 'uuid';
+
+export interface NavigationItem {
   id: string;
   label: string;
   href: string;
@@ -7,17 +9,43 @@ interface NavigationItem {
   children?: NavigationItem[];
 }
 
-interface WebsiteData {
+export interface WebsiteData {
   collegeName: string;
   tagline: string;
-  heroTitle: string;
-  heroSubtitle: string;
-  aboutTitle: string;
-  aboutContent: string;
+  logoUrl: string;
   primaryColor: string;
   secondaryColor: string;
-  logoUrl: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  ctaButtonText: string;
+  ctaButtonLink: string;
+  aboutTitle: string;
+  aboutContent: string;
+  academicsTitle: string;
+  academicsDescription: string;
+  departments: Array<{
+    id: string;
+    name: string;
+    duration: string;
+    seats: string;
+    link: string;
+  }>;
+  professionalBodiesTitle: string;
+  professionalBodies: Array<{
+    id: string;
+    name: string;
+    description: string;
+    website: string;
+    logo: string;
+  }>;
   navigationItems: NavigationItem[];
+  newsItems: Array<{
+    id: string;
+    title: string;
+    content: string;
+    date: string;
+    category: string;
+  }>;
   footerData: {
     contactInfo: {
       address: string;
@@ -28,108 +56,126 @@ interface WebsiteData {
     departments: Array<{ label: string; href: string }>;
     socialMedia: Array<{ platform: string; url: string; icon: string }>;
   };
-  newsItems: Array<{
-    id: string;
-    title: string;
-    content: string;
-    date: string;
-    category: string;
-  }>;
 }
 
-const DEFAULT_WEBSITE_DATA: WebsiteData = {
-  collegeName: "Springfield University",
-  tagline: "Excellence in Education",
-  heroTitle: "Shaping Tomorrow's Leaders",
-  heroSubtitle: "Join Springfield University, where innovation meets excellence. Our world-class faculty and cutting-edge facilities prepare students for successful careers.",
-  aboutTitle: "About Springfield University",
-  aboutContent: "Established in 1985, Springfield University has been at the forefront of educational excellence, fostering innovation, research, and character development for over three decades.",
-  primaryColor: "#2563eb",
-  secondaryColor: "#10b981",
-  logoUrl: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=60",
+const defaultWebsiteData: WebsiteData = {
+  collegeName: "Excellence University",
+  tagline: "Empowering Future Leaders",
+  logoUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=100&h=100&fit=crop&crop=center",
+  primaryColor: "#1e40af",
+  secondaryColor: "#3b82f6",
+  heroTitle: "Welcome to Excellence University",
+  heroSubtitle: "Join thousands of students in their journey towards academic excellence and professional success.",
+  ctaButtonText: "Apply Now",
+  ctaButtonLink: "/admissions",
+  aboutTitle: "About Our Institution",
+  aboutContent: "We are committed to providing world-class education and fostering innovation in all fields of study.",
+  academicsTitle: "Academic Programs",
+  academicsDescription: "Explore our comprehensive range of undergraduate and graduate programs",
+  departments: [
+    {
+      id: "cse",
+      name: "Computer Science & Engineering",
+      duration: "4 Years",
+      seats: "120",
+      link: "/departments/cse"
+    },
+    {
+      id: "it",
+      name: "Information Technology", 
+      duration: "4 Years",
+      seats: "60",
+      link: "/departments/it"
+    },
+    {
+      id: "ds",
+      name: "Data Science",
+      duration: "4 Years",
+      seats: "40",
+      link: "/departments/ds"
+    }
+  ],
+  professionalBodiesTitle: "Professional Bodies",
+  professionalBodies: [
+    {
+      id: "ieee",
+      name: "IEEE",
+      description: "Institute of Electrical and Electronics Engineers",
+      website: "https://ieee.org",
+      logo: ""
+    }
+  ],
   navigationItems: [
-    { id: 'home', label: 'Home', href: '#', type: 'internal' },
-    { id: 'departments', label: 'Departments', href: '#', type: 'dropdown', children: [
-      { id: 'cs', label: 'Computer Science', href: '/departments/cs', type: 'internal' },
-      { id: 'ee', label: 'Electrical Engineering', href: '/departments/ee', type: 'internal' }
-    ]},
-    { id: 'admissions', label: 'Admissions', href: '#', type: 'internal' },
-    { id: 'about', label: 'About', href: '#', type: 'internal' },
-    { id: 'contact', label: 'Contact', href: '#', type: 'internal' }
+    { id: 'home', label: 'Home', href: '/', type: 'internal' },
+    { id: 'about', label: 'About', href: '/about', type: 'internal' },
+    { id: 'academics', label: 'Academics', href: '/academics', type: 'internal' },
+    { id: 'admissions', label: 'Admissions', href: '/admissions', type: 'internal' },
+    { id: 'contact', label: 'Contact', href: '/contact', type: 'internal' },
+  ],
+  newsItems: [
+    {
+      id: uuidv4(),
+      title: "University Announces New Scholarship Program",
+      content: "We are excited to announce a new scholarship program for deserving students.",
+      date: "August 15, 2024",
+      category: "Academics",
+    },
+    {
+      id: uuidv4(),
+      title: "Campus Expansion Project Underway", 
+      content: "Construction has begun on our new state-of-the-art campus expansion project.",
+      date: "July 22, 2024",
+      category: "Campus",
+    },
   ],
   footerData: {
     contactInfo: {
-      address: "123 University Ave, Springfield",
-      phone: "+1 (555) 123-4567",
-      email: "info@springfield.edu"
+      address: "123 University Avenue, Cityville",
+      phone: "+1 555-123-4567",
+      email: "info@excellence.edu",
     },
     quickLinks: [
-      { label: "Admissions", href: "#" },
-      { label: "Academic Calendar", href: "#" },
-      { label: "Student Portal", href: "#" },
-      { label: "Alumni", href: "#" }
+      { label: "Admissions", href: "/admissions" },
+      { label: "Academics", href: "/academics" },
+      { label: "Research", href: "/research" },
+      { label: "Contact Us", href: "/contact" },
     ],
     departments: [
-      { label: "Computer Science", href: "#" },
-      { label: "Engineering", href: "#" },
-      { label: "Business", href: "#" },
-      { label: "Liberal Arts", href: "#" }
+      { label: "Computer Science", href: "/departments/computer-science" },
+      { label: "Business Administration", href: "/departments/business" },
+      { label: "Engineering", href: "/departments/engineering" },
     ],
     socialMedia: [
       { platform: "Facebook", url: "#", icon: "facebook" },
       { platform: "Twitter", url: "#", icon: "twitter" },
-      { platform: "LinkedIn", url: "#", icon: "linkedin" }
-    ]
+      { platform: "LinkedIn", url: "#", icon: "linkedin" },
+    ],
   },
-  newsItems: [
-    {
-      id: "1",
-      title: "Springfield University Ranked #1 in State",
-      content: "We are proud to announce our top ranking...",
-      date: "June 10, 2025",
-      category: "Achievement"
-    },
-    {
-      id: "2", 
-      title: "New AI Research Lab Inaugurated",
-      content: "Our state-of-the-art AI research facility...",
-      date: "June 8, 2025",
-      category: "Infrastructure"
-    }
-  ]
 };
 
-const STORAGE_KEY = 'necttos-website-data';
-
-export const websiteDataService = {
-  save: (data: WebsiteData): void => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      console.log('Website data saved successfully');
-    } catch (error) {
-      console.error('Failed to save website data:', error);
+const load = (): WebsiteData => {
+  try {
+    const serializedData = localStorage.getItem('websiteData');
+    if (serializedData === null) {
+      return defaultWebsiteData;
     }
-  },
-
-  load: (): WebsiteData => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsedData = JSON.parse(saved);
-        console.log('Website data loaded from storage');
-        return { ...DEFAULT_WEBSITE_DATA, ...parsedData };
-      }
-    } catch (error) {
-      console.error('Failed to load website data:', error);
-    }
-    console.log('Using default website data');
-    return DEFAULT_WEBSITE_DATA;
-  },
-
-  reset: (): WebsiteData => {
-    localStorage.removeItem(STORAGE_KEY);
-    return DEFAULT_WEBSITE_DATA;
+    return JSON.parse(serializedData);
+  } catch (error) {
+    console.error("Error loading website data from local storage:", error);
+    return defaultWebsiteData;
   }
 };
 
-export type { WebsiteData, NavigationItem };
+const save = (data: WebsiteData): void => {
+  try {
+    const serializedData = JSON.stringify(data);
+    localStorage.setItem('websiteData', serializedData);
+  } catch (error) {
+    console.error("Error saving website data to local storage:", error);
+  }
+};
+
+export const websiteDataService = {
+  load,
+  save,
+};
