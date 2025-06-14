@@ -87,12 +87,15 @@ const EditableSection: React.FC<EditableSectionProps> = ({
           </div>
         </header>
         
-        <Button
-          onClick={() => onEditSection('header')}
-          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-20 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-sm"
-        >
-          Edit Header
-        </Button>
+        {/* Fixed Edit Button - Now Visible */}
+        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30">
+          <Button
+            onClick={() => onEditSection('header')}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 text-sm shadow-lg border border-blue-500"
+          >
+            ✏ Edit Header
+          </Button>
+        </div>
       </section>
 
       {/* Hero Section */}
@@ -122,12 +125,15 @@ const EditableSection: React.FC<EditableSectionProps> = ({
           </div>
         </div>
         
-        <Button
-          onClick={() => onEditSection('hero')}
-          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-20 bg-white text-blue-600 hover:bg-slate-100 px-3 py-1 text-sm shadow-lg"
-        >
-          Edit Hero
-        </Button>
+        {/* Fixed Edit Button - Now Visible */}
+        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30">
+          <Button
+            onClick={() => onEditSection('hero')}
+            className="bg-white text-blue-600 hover:bg-slate-100 px-3 py-2 text-sm shadow-lg border border-white"
+          >
+            ✏ Edit Hero
+          </Button>
+        </div>
       </section>
 
       {/* About Section */}
@@ -166,12 +172,15 @@ const EditableSection: React.FC<EditableSectionProps> = ({
           </div>
         </div>
         
-        <Button
-          onClick={() => onEditSection('about')}
-          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-20 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-sm"
-        >
-          Edit About
-        </Button>
+        {/* Fixed Edit Button - Now Visible */}
+        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30">
+          <Button
+            onClick={() => onEditSection('about')}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 text-sm shadow-lg border border-blue-500"
+          >
+            ✏ Edit About
+          </Button>
+        </div>
       </section>
 
       {/* Academics Section */}
@@ -208,12 +217,15 @@ const EditableSection: React.FC<EditableSectionProps> = ({
           </div>
         </div>
         
-        <Button
-          onClick={() => onEditSection('academics')}
-          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-20 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-sm"
-        >
-          Edit Academics
-        </Button>
+        {/* Fixed Edit Button - Now Visible */}
+        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30">
+          <Button
+            onClick={() => onEditSection('academics')}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 text-sm shadow-lg border border-blue-500"
+          >
+            ✏ Edit Academics
+          </Button>
+        </div>
       </section>
 
       {/* Professional Bodies Section */}
@@ -255,12 +267,15 @@ const EditableSection: React.FC<EditableSectionProps> = ({
           </div>
         </div>
         
-        <Button
-          onClick={() => onEditSection('professional-bodies')}
-          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-20 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-sm"
-        >
-          Edit Professional Bodies
-        </Button>
+        {/* Fixed Edit Button - Now Visible */}
+        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30">
+          <Button
+            onClick={() => onEditSection('professional-bodies')}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 text-sm shadow-lg border border-blue-500"
+          >
+            ✏ Edit Professional Bodies
+          </Button>
+        </div>
       </section>
 
       {/* News Section */}
@@ -290,12 +305,15 @@ const EditableSection: React.FC<EditableSectionProps> = ({
           </div>
         </div>
         
-        <Button
-          onClick={() => onEditSection('news')}
-          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-20 bg-white text-blue-600 hover:bg-slate-100 px-3 py-1 text-sm shadow-lg"
-        >
-          Edit News
-        </Button>
+        {/* Fixed Edit Button - Now Visible */}
+        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30">
+          <Button
+            onClick={() => onEditSection('news')}
+            className="bg-white text-blue-600 hover:bg-slate-100 px-3 py-2 text-sm shadow-lg border border-white"
+          >
+            ✏ Edit News
+          </Button>
+        </div>
       </section>
 
       {/* Footer Section */}
@@ -355,12 +373,15 @@ const EditableSection: React.FC<EditableSectionProps> = ({
           </div>
         </div>
         
-        <Button
-          onClick={() => onEditSection('footer')}
-          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-20 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-sm"
-        >
-          Edit Footer
-        </Button>
+        {/* Fixed Edit Button - Now Visible */}
+        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30">
+          <Button
+            onClick={() => onEditSection('footer')}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 text-sm shadow-lg border border-blue-500"
+          >
+            ✏ Edit Footer
+          </Button>
+        </div>
       </section>
     </div>
   );

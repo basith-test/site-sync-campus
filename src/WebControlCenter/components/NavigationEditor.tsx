@@ -91,7 +91,7 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({ items, onUpdate }) 
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
+      <div className="space-y-3">
         {items.map((item, index) => (
           <div 
             key={item.id} 
@@ -103,30 +103,38 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({ items, onUpdate }) 
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, index)}
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2">
-                <div className="cursor-grab text-slate-400 hover:text-slate-600">
+            {/* Header Row - Fixed Flexbox Layout */}
+            <div className="flex items-center justify-between mb-3 gap-3">
+              {/* Left Section: Drag Handle + Item Label */}
+              <div className="flex items-center space-x-3 flex-1 min-w-0">
+                <div className="cursor-grab text-slate-400 hover:text-slate-600 flex-shrink-0">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
                   </svg>
                 </div>
-                <span className="font-medium dark:text-white">{item.label}</span>
-                <span className="px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded dark:bg-blue-900 dark:text-blue-300">
+                <span className="font-medium dark:text-white truncate">{item.label}</span>
+              </div>
+              
+              {/* Center Section: Type Badge */}
+              <div className="flex-shrink-0">
+                <span className="px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded dark:bg-blue-900 dark:text-blue-300 whitespace-nowrap">
                   {item.type}
                 </span>
               </div>
-              <div className="flex space-x-2">
+              
+              {/* Right Section: Action Buttons */}
+              <div className="flex items-center space-x-2 flex-shrink-0">
                 <Button
                   type="edit"
                   onClick={() => setEditingIndex(editingIndex === index ? null : index)}
-                  className="text-xs px-2 py-1"
+                  className="text-xs px-2 py-1 whitespace-nowrap"
                 >
                   {editingIndex === index ? 'Save' : 'Edit'}
                 </Button>
                 <Button
                   type="delete"
                   onClick={() => removeNavItem(index)}
-                  className="text-xs px-2 py-1"
+                  className="text-xs px-2 py-1 whitespace-nowrap"
                 >
                   Delete
                 </Button>
@@ -135,7 +143,7 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({ items, onUpdate }) 
 
             {editingIndex === index && (
               <div className="space-y-3 border-t pt-3 dark:border-slate-600">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <input
                     type="text"
                     value={item.label}
@@ -194,7 +202,7 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({ items, onUpdate }) 
                           <Button
                             type="delete"
                             onClick={() => removeDropdownChild(index, childIndex)}
-                            className="text-xs px-1 py-1"
+                            className="text-xs px-1 py-1 flex-shrink-0"
                           >
                             ×
                           </Button>

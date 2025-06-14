@@ -1,8 +1,8 @@
 
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { Main, Header, Body } from '../NecttosComp/Layout/Layout';
 import Button from '../NecttosComp/Button/Button';
-import { NecttosContext } from '../context/NecttosContext';
+import { useNecttos } from './context/NecttosContext';
 import WebsiteEditor from './WebsiteEditor';
 import WebsitePreview from './WebsitePreview';
 
@@ -11,7 +11,7 @@ interface EditWebsiteProps {
 }
 
 const EditWebsite: React.FC<EditWebsiteProps> = ({ onBack }) => {
-  const { college } = useContext(NecttosContext);
+  const { college } = useNecttos();
   const [currentView, setCurrentView] = useState<'editor' | 'preview'>('editor');
 
   return (
