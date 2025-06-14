@@ -1,4 +1,3 @@
-
 import React, { useContext, useState } from 'react';
 import { Header, Main } from '../NecttosComp/Layout/Layout';
 import { NecttosContext } from '../context/NecttosContext';
@@ -63,9 +62,11 @@ const WebsiteControlCenter: React.FC<WebsiteControlCenterProps> = ({ isTemp, onC
               <p className="text-xs text-slate-500 dark:text-slate-400">Website Control Center</p>
             </div>
           </div>
-          <Button type="close" onClick={onClose} className="ml-auto">
-            Close
-          </Button>
+          <div className="ml-auto">
+            <Button type="close" onClick={onClose}>
+              Close
+            </Button>
+          </div>
         </div>
       </Header>
       
