@@ -1,7 +1,7 @@
-
 import React from 'react';
-import Input from '../../NecttosComp/Input/Input';
 import Button from '../../NecttosComp/Button/Button';
+import Input from '../../NecttosComp/Input/Input';
+import NavigationEditor from './NavigationEditor';
 import { WebsiteData } from '../services/websiteDataService';
 
 interface EditorSidebarProps {
@@ -11,6 +11,18 @@ interface EditorSidebarProps {
 }
 
 const EditorSidebar: React.FC<EditorSidebarProps> = ({ editingSection, websiteData, updateWebsiteData }) => {
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        updateWebsiteData("logoUrl", result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   if (!editingSection) {
     return (
       <div className="flex items-center justify-center h-full text-slate-500 dark:text-slate-400">
@@ -27,50 +39,60 @@ const EditorSidebar: React.FC<EditorSidebarProps> = ({ editingSection, websiteDa
       case "header":
         return (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">Header Settings</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Configure your website header</p>
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border dark:border-slate-700">
+              <h3 className="text-lg font-semibold mb-4 dark:text-white">Header Settings</h3>
               
               <div className="space-y-4">
                 <Input
                   type="text"
                   fieldName="College Name"
-                  state={websiteData}
-                  returnKey="collegeName"
-                  setState={(newState) => updateWebsiteData("collegeName", newState.collegeName)}
+                  state={websiteData.collegeName}
+                  setState={(value) => updateWebsiteData("collegeName", value)}
                   width="100%"
                 />
                 
                 <Input
                   type="text"
                   fieldName="Tagline"
-                  state={websiteData}
-                  returnKey="tagline"
-                  setState={(newState) => updateWebsiteData("tagline", newState.tagline)}
+                  state={websiteData.tagline}
+                  setState={(value) => updateWebsiteData("tagline", value)}
                   width="100%"
                 />
-
-                <div className="border-t border-slate-200 dark:border-slate-600 pt-4">
-                  <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
-                    College Logo
-                  </label>
-                  <div className="flex items-center space-x-3 mb-3">
+                
+                <div>
+                  <label className="block text-sm font-medium mb-2 dark:text-white">College Logo</label>
+                  <div className="flex items-center space-x-4">
                     <img 
                       src={websiteData.logoUrl} 
                       alt="Logo preview" 
-                      className="w-12 h-12 rounded object-cover border border-slate-300 dark:border-slate-600"
+                      className="w-16 h-16 rounded object-cover border dark:border-slate-600"
                     />
                     <div className="flex-1">
-                      <Input
+                      <input
                         type="file"
-                        fieldName="Upload New Logo"
-                        onChange={(e) => updateWebsiteData("logoUrl", e.value)}
-                        width="100%"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                        id="logo-upload"
                       />
+                      <Button
+                        type="save"
+                        onClick={() => document.getElementById('logo-upload')?.click()}
+                      >
+                        📷 Upload New Logo
+                      </Button>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border dark:border-slate-700">
+              <h3 className="text-lg font-semibold mb-4 dark:text-white">Navigation Menu</h3>
+              <NavigationEditor
+                items={websiteData.navigationItems}
+                onUpdate={(items) => updateWebsiteData("navigationItems", items)}
+              />
             </div>
           </div>
         );
@@ -78,42 +100,317 @@ const EditorSidebar: React.FC<EditorSidebarProps> = ({ editingSection, websiteDa
       case "hero":
         return (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">Hero Section</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Main banner content</p>
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border dark:border-slate-700">
+              <h3 className="text-lg font-semibold mb-4 dark:text-white">Hero Section</h3>
               
               <div className="space-y-4">
                 <Input
                   type="text"
                   fieldName="Hero Title"
-                  state={websiteData}
-                  returnKey="heroTitle"
-                  setState={(newState) => updateWebsiteData("heroTitle", newState.heroTitle)}
+                  state={websiteData.heroTitle}
+                  setState={(value) => updateWebsiteData("heroTitle", value)}
                   width="100%"
                 />
                 
                 <div>
-                  <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
-                    Hero Subtitle
-                  </label>
+                  <label className="block text-sm font-medium mb-2 dark:text-white">Hero Subtitle</label>
                   <textarea
                     value={websiteData.heroSubtitle}
                     onChange={(e) => updateWebsiteData("heroSubtitle", e.target.value)}
                     rows={3}
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                    className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-white dark:border-slate-600"
                   />
                 </div>
-
+                
                 <div>
-                  <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
-                    Background Color
-                  </label>
+                  <label className="block text-sm font-medium mb-2 dark:text-white">Background Color</label>
                   <input
                     type="color"
                     value={websiteData.primaryColor}
                     onChange={(e) => updateWebsiteData("primaryColor", e.target.value)}
-                    className="w-full h-10 border border-slate-300 dark:border-slate-600 rounded-md"
+                    className="w-full h-10 border rounded dark:border-slate-600"
                   />
+                </div>
+                
+                <Input
+                  type="text"
+                  fieldName="CTA Button Text"
+                  state={websiteData.ctaButtonText || "Apply Now"}
+                  setState={(value) => updateWebsiteData("ctaButtonText", value)}
+                  width="100%"
+                />
+                
+                <Input
+                  type="text"
+                  fieldName="CTA Button Link"
+                  state={websiteData.ctaButtonLink || "#"}
+                  setState={(value) => updateWebsiteData("ctaButtonLink", value)}
+                  width="100%"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case "academics":
+        return (
+          <div className="space-y-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border dark:border-slate-700">
+              <h3 className="text-lg font-semibold mb-4 dark:text-white">Academics Section</h3>
+              
+              <div className="space-y-4">
+                <Input
+                  type="text"
+                  fieldName="Section Title"
+                  state={websiteData.academicsTitle || "Academic Programs"}
+                  setState={(value) => updateWebsiteData("academicsTitle", value)}
+                  width="100%"
+                />
+                
+                <div>
+                  <label className="block text-sm font-medium mb-2 dark:text-white">Section Description</label>
+                  <textarea
+                    value={websiteData.academicsDescription || "Explore our comprehensive range of undergraduate and graduate programs"}
+                    onChange={(e) => updateWebsiteData("academicsDescription", e.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-white dark:border-slate-600"
+                  />
+                </div>
+                
+                <div className="space-y-4">
+                  <h4 className="font-medium dark:text-white">Departments/Programs</h4>
+                  {(websiteData.departments || []).map((dept: any, index: number) => (
+                    <div key={index} className="border rounded p-3 dark:border-slate-600">
+                      <div className="space-y-2">
+                        <Input
+                          type="text"
+                          fieldName="Department Name"
+                          state={dept.name}
+                          setState={(value) => {
+                            const updated = [...(websiteData.departments || [])];
+                            updated[index] = { ...dept, name: value };
+                            updateWebsiteData("departments", updated);
+                          }}
+                          width="100%"
+                        />
+                        
+                        <Input
+                          type="text"
+                          fieldName="Duration"
+                          state={dept.duration}
+                          setState={(value) => {
+                            const updated = [...(websiteData.departments || [])];
+                            updated[index] = { ...dept, duration: value };
+                            updateWebsiteData("departments", updated);
+                          }}
+                          width="100%"
+                        />
+                        
+                        <Input
+                          type="text"
+                          fieldName="Seats Available"
+                          state={dept.seats}
+                          setState={(value) => {
+                            const updated = [...(websiteData.departments || [])];
+                            updated[index] = { ...dept, seats: value };
+                            updateWebsiteData("departments", updated);
+                          }}
+                          width="100%"
+                        />
+                        
+                        <Input
+                          type="text"
+                          fieldName="Learn More Link"
+                          state={dept.link || "#"}
+                          setState={(value) => {
+                            const updated = [...(websiteData.departments || [])];
+                            updated[index] = { ...dept, link: value };
+                            updateWebsiteData("departments", updated);
+                          }}
+                          width="100%"
+                        />
+                        
+                        <Button
+                          type="delete"
+                          onClick={() => {
+                            const updated = [...(websiteData.departments || [])];
+                            updated.splice(index, 1);
+                            updateWebsiteData("departments", updated);
+                          }}
+                        >
+                          Remove Department
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <Button
+                    type="save"
+                    onClick={() => {
+                      const newDept = {
+                        id: `dept-${Date.now()}`,
+                        name: "New Department",
+                        duration: "4 Years",
+                        seats: "60",
+                        link: "#"
+                      };
+                      updateWebsiteData("departments", [...(websiteData.departments || []), newDept]);
+                    }}
+                  >
+                    Add Department
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "professional-bodies":
+        return (
+          <div className="space-y-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border dark:border-slate-700">
+              <h3 className="text-lg font-semibold mb-4 dark:text-white">Professional Bodies</h3>
+              
+              <div className="space-y-4">
+                <Input
+                  type="text"
+                  fieldName="Section Title"
+                  state={websiteData.professionalBodiesTitle || "Professional Bodies"}
+                  setState={(value) => updateWebsiteData("professionalBodiesTitle", value)}
+                  width="100%"
+                />
+                
+                <div className="space-y-4">
+                  <h4 className="font-medium dark:text-white">Professional Body Tiles</h4>
+                  {(websiteData.professionalBodies || []).map((body: any, index: number) => (
+                    <div key={index} className="border rounded p-3 dark:border-slate-600">
+                      <div className="space-y-2">
+                        <Input
+                          type="text"
+                          fieldName="Organization Name"
+                          state={body.name}
+                          setState={(value) => {
+                            const updated = [...(websiteData.professionalBodies || [])];
+                            updated[index] = { ...body, name: value };
+                            updateWebsiteData("professionalBodies", updated);
+                          }}
+                          width="100%"
+                        />
+                        
+                        <div>
+                          <label className="block text-sm font-medium mb-2 dark:text-white">Description</label>
+                          <textarea
+                            value={body.description}
+                            onChange={(e) => {
+                              const updated = [...(websiteData.professionalBodies || [])];
+                              updated[index] = { ...body, description: e.target.value };
+                              updateWebsiteData("professionalBodies", updated);
+                            }}
+                            rows={2}
+                            className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-white dark:border-slate-600"
+                          />
+                        </div>
+                        
+                        <Input
+                          type="text"
+                          fieldName="Website URL"
+                          state={body.website}
+                          setState={(value) => {
+                            const updated = [...(websiteData.professionalBodies || [])];
+                            updated[index] = { ...body, website: value };
+                            updateWebsiteData("professionalBodies", updated);
+                          }}
+                          width="100%"
+                        />
+                        
+                        <div>
+                          <label className="block text-sm font-medium mb-2 dark:text-white">Logo</label>
+                          <div className="flex items-center space-x-4">
+                            {body.logo && (
+                              <img 
+                                src={body.logo} 
+                                alt="Logo" 
+                                className="w-12 h-12 rounded object-cover border dark:border-slate-600"
+                              />
+                            )}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = (event) => {
+                                    const updated = [...(websiteData.professionalBodies || [])];
+                                    updated[index] = { ...body, logo: event.target?.result as string };
+                                    updateWebsiteData("professionalBodies", updated);
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                              className="hidden"
+                              id={`logo-upload-${index}`}
+                            />
+                            <Button
+                              type="save"
+                              onClick={() => document.getElementById(`logo-upload-${index}`)?.click()}
+                            >
+                              📷 Upload Logo
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        <Button
+                          type="delete"
+                          onClick={() => {
+                            const updated = [...(websiteData.professionalBodies || [])];
+                            updated.splice(index, 1);
+                            updateWebsiteData("professionalBodies", updated);
+                          }}
+                        >
+                          Remove Organization
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <h5 className="w-full font-medium dark:text-white">Quick Add Popular Bodies:</h5>
+                    {['IEEE', 'IEDC', 'CSI', 'ACM', 'IEI', 'ISTE'].map(body => (
+                      <Button
+                        key={body}
+                        type="edit"
+                        onClick={() => {
+                          const newBody = {
+                            id: `body-${Date.now()}`,
+                            name: body,
+                            description: `${body} professional organization`,
+                            website: "#",
+                            logo: ""
+                          };
+                          updateWebsiteData("professionalBodies", [...(websiteData.professionalBodies || []), newBody]);
+                        }}
+                      >
+                        + {body}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  <Button
+                    type="save"
+                    onClick={() => {
+                      const newBody = {
+                        id: `body-${Date.now()}`,
+                        name: "New Organization",
+                        description: "Description here...",
+                        website: "#",
+                        logo: ""
+                      };
+                      updateWebsiteData("professionalBodies", [...(websiteData.professionalBodies || []), newBody]);
+                    }}
+                  >
+                    Add Custom Organization
+                  </Button>
                 </div>
               </div>
             </div>
@@ -123,29 +420,25 @@ const EditorSidebar: React.FC<EditorSidebarProps> = ({ editingSection, websiteDa
       case "about":
         return (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">About Section</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">College information and content</p>
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border dark:border-slate-700">
+              <h3 className="text-lg font-semibold mb-4 dark:text-white">About Section</h3>
               
               <div className="space-y-4">
                 <Input
                   type="text"
                   fieldName="About Title"
-                  state={websiteData}
-                  returnKey="aboutTitle"
-                  setState={(newState) => updateWebsiteData("aboutTitle", newState.aboutTitle)}
+                  state={websiteData.aboutTitle}
+                  setState={(value) => updateWebsiteData("aboutTitle", value)}
                   width="100%"
                 />
                 
                 <div>
-                  <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
-                    About Content
-                  </label>
+                  <label className="block text-sm font-medium mb-2 dark:text-white">About Content</label>
                   <textarea
                     value={websiteData.aboutContent}
                     onChange={(e) => updateWebsiteData("aboutContent", e.target.value)}
                     rows={6}
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                    className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-white dark:border-slate-600"
                   />
                 </div>
               </div>
@@ -156,31 +449,27 @@ const EditorSidebar: React.FC<EditorSidebarProps> = ({ editingSection, websiteDa
       case "news":
         return (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">News Section</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Manage news articles and announcements</p>
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border dark:border-slate-700">
+              <h3 className="text-lg font-semibold mb-4 dark:text-white">News Section</h3>
               
               <div className="space-y-4">
                 {websiteData.newsItems.map((item, index) => (
-                  <div key={item.id} className="border border-slate-200 dark:border-slate-600 rounded p-3">
+                  <div key={item.id} className="border rounded p-3 dark:border-slate-600">
                     <div className="space-y-2">
                       <Input
                         type="text"
                         fieldName="Title"
-                        state={{ title: item.title }}
-                        returnKey="title"
-                        setState={(newState) => {
+                        state={item.title}
+                        setState={(value) => {
                           const updated = [...websiteData.newsItems];
-                          updated[index] = { ...item, title: newState.title };
+                          updated[index] = { ...item, title: value };
                           updateWebsiteData("newsItems", updated);
                         }}
                         width="100%"
                       />
                       
                       <div>
-                        <label className="block text-sm font-medium text-slate-900 dark:text-white mb-1">
-                          Content
-                        </label>
+                        <label className="block text-sm font-medium mb-2 dark:text-white">Content</label>
                         <textarea
                           value={item.content}
                           onChange={(e) => {
@@ -189,7 +478,7 @@ const EditorSidebar: React.FC<EditorSidebarProps> = ({ editingSection, websiteDa
                             updateWebsiteData("newsItems", updated);
                           }}
                           rows={2}
-                          className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm"
+                          className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-white dark:border-slate-600"
                         />
                       </div>
                       
@@ -197,11 +486,10 @@ const EditorSidebar: React.FC<EditorSidebarProps> = ({ editingSection, websiteDa
                         <Input
                           type="text"
                           fieldName="Date"
-                          state={{ date: item.date }}
-                          returnKey="date"
-                          setState={(newState) => {
+                          state={item.date}
+                          setState={(value) => {
                             const updated = [...websiteData.newsItems];
-                            updated[index] = { ...item, date: newState.date };
+                            updated[index] = { ...item, date: value };
                             updateWebsiteData("newsItems", updated);
                           }}
                           width="100%"
@@ -210,11 +498,10 @@ const EditorSidebar: React.FC<EditorSidebarProps> = ({ editingSection, websiteDa
                         <Input
                           type="text"
                           fieldName="Category"
-                          state={{ category: item.category }}
-                          returnKey="category"
-                          setState={(newState) => {
+                          state={item.category}
+                          setState={(value) => {
                             const updated = [...websiteData.newsItems];
-                            updated[index] = { ...item, category: newState.category };
+                            updated[index] = { ...item, category: value };
                             updateWebsiteData("newsItems", updated);
                           }}
                           width="100%"
@@ -236,9 +523,8 @@ const EditorSidebar: React.FC<EditorSidebarProps> = ({ editingSection, websiteDa
                     };
                     updateWebsiteData("newsItems", [...websiteData.newsItems, newItem]);
                   }}
-                  width="100%"
                 >
-                  ➕ Add News Item
+                  Add News Item
                 </Button>
               </div>
             </div>
@@ -248,22 +534,20 @@ const EditorSidebar: React.FC<EditorSidebarProps> = ({ editingSection, websiteDa
       case "footer":
         return (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">Footer Section</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Footer content and social media links</p>
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border dark:border-slate-700">
+              <h3 className="text-lg font-semibold mb-4 dark:text-white">Footer Section</h3>
               
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-medium text-slate-900 dark:text-white mb-2">Contact Information</h4>
+                  <label className="block text-sm font-medium mb-2 dark:text-white">Contact Information</label>
                   <div className="space-y-2">
                     <Input
                       type="text"
                       fieldName="Address"
-                      state={{ address: websiteData.footerData.contactInfo.address }}
-                      returnKey="address"
-                      setState={(newState) => updateWebsiteData("footerData", {
+                      state={websiteData.footerData.contactInfo.address}
+                      setState={(value) => updateWebsiteData("footerData", {
                         ...websiteData.footerData,
-                        contactInfo: { ...websiteData.footerData.contactInfo, address: newState.address }
+                        contactInfo: { ...websiteData.footerData.contactInfo, address: value }
                       })}
                       width="100%"
                     />
@@ -271,23 +555,21 @@ const EditorSidebar: React.FC<EditorSidebarProps> = ({ editingSection, websiteDa
                     <Input
                       type="text"
                       fieldName="Phone"
-                      state={{ phone: websiteData.footerData.contactInfo.phone }}
-                      returnKey="phone"
-                      setState={(newState) => updateWebsiteData("footerData", {
+                      state={websiteData.footerData.contactInfo.phone}
+                      setState={(value) => updateWebsiteData("footerData", {
                         ...websiteData.footerData,
-                        contactInfo: { ...websiteData.footerData.contactInfo, phone: newState.phone }
+                        contactInfo: { ...websiteData.footerData.contactInfo, phone: value }
                       })}
                       width="100%"
                     />
                     
                     <Input
-                      type="email"
+                      type="text"
                       fieldName="Email"
-                      state={{ email: websiteData.footerData.contactInfo.email }}
-                      returnKey="email"
-                      setState={(newState) => updateWebsiteData("footerData", {
+                      state={websiteData.footerData.contactInfo.email}
+                      setState={(value) => updateWebsiteData("footerData", {
                         ...websiteData.footerData,
-                        contactInfo: { ...websiteData.footerData.contactInfo, email: newState.email }
+                        contactInfo: { ...websiteData.footerData.contactInfo, email: value }
                       })}
                       width="100%"
                     />
@@ -295,18 +577,17 @@ const EditorSidebar: React.FC<EditorSidebarProps> = ({ editingSection, websiteDa
                 </div>
                 
                 <div>
-                  <h4 className="font-medium text-slate-900 dark:text-white mb-2">Social Media Links</h4>
+                  <label className="block text-sm font-medium mb-2 dark:text-white">Social Media Links</label>
                   <div className="space-y-2">
                     {websiteData.footerData.socialMedia.map((social, index) => (
                       <div key={index} className="grid grid-cols-2 gap-2">
                         <Input
                           type="text"
                           fieldName="Platform"
-                          state={{ platform: social.platform }}
-                          returnKey="platform"
-                          setState={(newState) => {
+                          state={social.platform}
+                          setState={(value) => {
                             const updated = [...websiteData.footerData.socialMedia];
-                            updated[index] = { ...social, platform: newState.platform };
+                            updated[index] = { ...social, platform: value };
                             updateWebsiteData("footerData", {
                               ...websiteData.footerData,
                               socialMedia: updated
@@ -318,11 +599,10 @@ const EditorSidebar: React.FC<EditorSidebarProps> = ({ editingSection, websiteDa
                         <Input
                           type="text"
                           fieldName="URL"
-                          state={{ url: social.url }}
-                          returnKey="url"
-                          setState={(newState) => {
+                          state={social.url}
+                          setState={(value) => {
                             const updated = [...websiteData.footerData.socialMedia];
-                            updated[index] = { ...social, url: newState.url };
+                            updated[index] = { ...social, url: value };
                             updateWebsiteData("footerData", {
                               ...websiteData.footerData,
                               socialMedia: updated
@@ -343,9 +623,8 @@ const EditorSidebar: React.FC<EditorSidebarProps> = ({ editingSection, websiteDa
                         socialMedia: [...websiteData.footerData.socialMedia, newSocial]
                       });
                     }}
-                    width="100%"
                   >
-                    ➕ Add Social Media
+                    Add Social Media
                   </Button>
                 </div>
               </div>
