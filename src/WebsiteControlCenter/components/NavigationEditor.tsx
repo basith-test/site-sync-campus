@@ -1,15 +1,6 @@
 
 import React, { useState } from 'react';
-import Button from '../../NecttosComp/Button/Button';
-import Input from '../../NecttosComp/Input/Input';
-
-interface NavigationItem {
-  id: string;
-  label: string;
-  href: string;
-  type: 'internal' | 'external' | 'dropdown';
-  children?: NavigationItem[];
-}
+import { NavigationItem } from '../services/websiteDataService';
 
 interface NavigationEditorProps {
   items: NavigationItem[];
@@ -17,176 +8,161 @@ interface NavigationEditorProps {
 }
 
 const NavigationEditor: React.FC<NavigationEditorProps> = ({ items, onUpdate }) => {
-  const [editingItem, setEditingItem] = useState<string | null>(null);
-  const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-  const defaultItems = [
-    { id: 'home', label: 'Home', href: '/', type: 'internal' as const },
-    { id: 'departments', label: 'Departments', href: '/departments', type: 'dropdown' as const },
-    { id: 'admissions', label: 'Admissions', href: '/admissions', type: 'internal' as const },
-    { id: 'about', label: 'About', href: '/about', type: 'internal' as const },
-    { id: 'contact', label: 'Contact', href: '/contact', type: 'internal' as const },
-  ];
-
-  const addNavigationItem = (template?: NavigationItem) => {
-    const newItem: NavigationItem = template || {
+  const addNavItem = () => {
+    const newItem: NavigationItem = {
       id: `nav-${Date.now()}`,
       label: 'New Item',
       href: '#',
       type: 'internal'
     };
-    
-    const updatedItems = [...items, newItem];
-    onUpdate(updatedItems);
-    setEditingItem(newItem.id);
+    onUpdate([...items, newItem]);
   };
 
-  const updateNavigationItem = (id: string, updates: Partial<NavigationItem>) => {
-    const updatedItems = items.map(item =>
-      item.id === id ? { ...item, ...updates } : item
-    );
-    onUpdate(updatedItems);
+  const updateNavItem = (index: number, field: keyof NavigationItem, value: any) => {
+    const updated = [...items];
+    updated[index] = { ...updated[index], [field]: value };
+    onUpdate(updated);
   };
 
-  const deleteNavigationItem = (id: string) => {
-    const updatedItems = items.filter(item => item.id !== id);
-    onUpdate(updatedItems);
+  const removeNavItem = (index: number) => {
+    const updated = items.filter((_, i) => i !== index);
+    onUpdate(updated);
   };
 
-  const handleDragStart = (e: React.DragEvent, itemId: string) => {
-    setDraggedItem(itemId);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleDrop = (e: React.DragEvent, targetId: string) => {
-    e.preventDefault();
-    
-    if (!draggedItem || draggedItem === targetId) return;
-
-    const draggedIndex = items.findIndex(item => item.id === draggedItem);
-    const targetIndex = items.findIndex(item => item.id === targetId);
-
-    if (draggedIndex === -1 || targetIndex === -1) return;
-
-    const newItems = [...items];
-    const [draggedItemData] = newItems.splice(draggedIndex, 1);
-    newItems.splice(targetIndex, 0, draggedItemData);
-
-    onUpdate(newItems);
-    setDraggedItem(null);
+  const moveNavItem = (fromIndex: number, toIndex: number) => {
+    const updated = [...items];
+    const [moved] = updated.splice(fromIndex, 1);
+    updated.splice(toIndex, 0, moved);
+    onUpdate(updated);
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold dark:text-white">Navigation Menu</h3>
-        <select 
-          onChange={(e) => {
-            if (e.target.value === 'custom') {
-              addNavigationItem();
-            } else {
-              const template = defaultItems.find(item => item.id === e.target.value);
-              if (template) addNavigationItem(template);
-            }
-            e.target.value = '';
-          }}
-          className="px-3 py-2 border rounded dark:bg-slate-700 dark:text-white"
-        >
-          <option value="">Add Item</option>
-          {defaultItems.map(item => (
-            <option key={item.id} value={item.id}>{item.label}</option>
-          ))}
-          <option value="custom">Custom Item</option>
-        </select>
-      </div>
-
       <div className="space-y-2">
-        {items.map((item) => (
-          <div 
-            key={item.id}
-            className={`border rounded p-3 dark:border-slate-600 ${draggedItem === item.id ? 'opacity-50' : ''} ${editingItem === item.id ? 'ring-2 ring-blue-500' : ''}`}
-            draggable
-            onDragStart={(e) => handleDragStart(e, item.id)}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, item.id)}
-          >
-            {editingItem === item.id ? (
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <span className="cursor-grab">⋮⋮</span>
-                  <div className="flex-1 space-y-2">
-                    <Input
-                      type="text"
-                      fieldName="Label"
-                      state={item.label}
-                      setState={(value) => updateNavigationItem(item.id, { label: value })}
-                      width="100%"
-                    />
-                    <Input
-                      type="text"
-                      fieldName="Link (href)"
-                      state={item.href}
-                      setState={(value) => updateNavigationItem(item.id, { href: value })}
-                      width="100%"
-                    />
-                    <select 
-                      value={item.type}
-                      onChange={(e) => updateNavigationItem(item.id, { type: e.target.value as 'internal' | 'external' | 'dropdown' })}
-                      className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-white"
-                    >
-                      <option value="internal">Internal Page</option>
-                      <option value="external">External Link</option>
-                      <option value="dropdown">Dropdown Menu</option>
-                    </select>
-                  </div>
-                  <div className="flex flex-col space-y-1">
-                    <Button type="save" onClick={() => setEditingItem(null)}>
-                      ✅
-                    </Button>
-                    <Button type="close" onClick={() => setEditingItem(null)}>
-                      ❌
-                    </Button>
-                  </div>
-                </div>
+        {items.map((item, index) => (
+          <div key={item.id} className="border rounded p-3 dark:border-slate-600">
+            <div className="flex items-center space-x-2 mb-2">
+              <input
+                type="text"
+                value={item.label}
+                onChange={(e) => updateNavItem(index, 'label', e.target.value)}
+                className="flex-1 px-2 py-1 border rounded text-sm dark:bg-slate-700 dark:text-white dark:border-slate-600"
+                placeholder="Label"
+              />
+              <select
+                value={item.type}
+                onChange={(e) => updateNavItem(index, 'type', e.target.value as NavigationItem['type'])}
+                className="px-2 py-1 border rounded text-sm dark:bg-slate-700 dark:text-white dark:border-slate-600"
+              >
+                <option value="internal">Internal</option>
+                <option value="external">External</option>
+                <option value="dropdown">Dropdown</option>
+              </select>
+            </div>
+            
+            <div className="flex items-center space-x-2 mb-2">
+              <input
+                type="text"
+                value={item.href}
+                onChange={(e) => updateNavItem(index, 'href', e.target.value)}
+                className="flex-1 px-2 py-1 border rounded text-sm dark:bg-slate-700 dark:text-white dark:border-slate-600"
+                placeholder="URL/Link"
+              />
+              <div className="flex space-x-1">
+                <button
+                  onClick={() => moveNavItem(index, Math.max(0, index - 1))}
+                  disabled={index === 0}
+                  className="px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded disabled:opacity-50 dark:bg-blue-900 dark:text-blue-300"
+                >
+                  ↑
+                </button>
+                <button
+                  onClick={() => moveNavItem(index, Math.min(items.length - 1, index + 1))}
+                  disabled={index === items.length - 1}
+                  className="px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded disabled:opacity-50 dark:bg-blue-900 dark:text-blue-300"
+                >
+                  ↓
+                </button>
+                <button
+                  onClick={() => removeNavItem(index)}
+                  className="px-2 py-1 text-xs bg-red-100 text-red-600 rounded dark:bg-red-900 dark:text-red-300"
+                >
+                  ✕
+                </button>
               </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <span className="cursor-grab text-gray-400">⋮⋮</span>
-                  <div>
-                    <span className="font-medium dark:text-white">{item.label}</span>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      {item.href} 
-                      <span className="ml-2 px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs">
-                        {item.type}
-                      </span>
-                    </div>
+            </div>
+
+            {item.type === 'dropdown' && (
+              <div className="ml-4 space-y-2">
+                <div className="text-sm font-medium dark:text-white">Dropdown Items:</div>
+                {(item.children || []).map((child, childIndex) => (
+                  <div key={child.id} className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={child.label}
+                      onChange={(e) => {
+                        const updated = [...items];
+                        if (!updated[index].children) updated[index].children = [];
+                        updated[index].children![childIndex] = { ...child, label: e.target.value };
+                        onUpdate(updated);
+                      }}
+                      className="flex-1 px-2 py-1 border rounded text-xs dark:bg-slate-700 dark:text-white dark:border-slate-600"
+                      placeholder="Child Label"
+                    />
+                    <input
+                      type="text"
+                      value={child.href}
+                      onChange={(e) => {
+                        const updated = [...items];
+                        if (!updated[index].children) updated[index].children = [];
+                        updated[index].children![childIndex] = { ...child, href: e.target.value };
+                        onUpdate(updated);
+                      }}
+                      className="flex-1 px-2 py-1 border rounded text-xs dark:bg-slate-700 dark:text-white dark:border-slate-600"
+                      placeholder="Child URL"
+                    />
+                    <button
+                      onClick={() => {
+                        const updated = [...items];
+                        updated[index].children = updated[index].children?.filter((_, i) => i !== childIndex) || [];
+                        onUpdate(updated);
+                      }}
+                      className="px-2 py-1 text-xs bg-red-100 text-red-600 rounded dark:bg-red-900 dark:text-red-300"
+                    >
+                      ✕
+                    </button>
                   </div>
-                </div>
-                <div className="flex space-x-1">
-                  <Button type="edit" onClick={() => setEditingItem(item.id)}>
-                    ✏️
-                  </Button>
-                  <Button type="delete" onClick={() => deleteNavigationItem(item.id)}>
-                    🗑️
-                  </Button>
-                </div>
+                ))}
+                <button
+                  onClick={() => {
+                    const updated = [...items];
+                    if (!updated[index].children) updated[index].children = [];
+                    updated[index].children!.push({
+                      id: `child-${Date.now()}`,
+                      label: 'New Child',
+                      href: '#',
+                      type: 'internal'
+                    });
+                    onUpdate(updated);
+                  }}
+                  className="px-2 py-1 text-xs bg-green-100 text-green-600 rounded dark:bg-green-900 dark:text-green-300"
+                >
+                  + Add Dropdown Item
+                </button>
               </div>
             )}
           </div>
         ))}
       </div>
-
-      {items.length === 0 && (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-          <p>No navigation items. Click "Add Item" to get started.</p>
-        </div>
-      )}
+      
+      <button
+        onClick={addNavItem}
+        className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+      >
+        + Add Navigation Item
+      </button>
     </div>
   );
 };
